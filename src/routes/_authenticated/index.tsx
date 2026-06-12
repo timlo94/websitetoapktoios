@@ -17,7 +17,7 @@ import {
   Sparkles, Upload, FileText, Zap, Send, Image as ImageIcon,
   Wand2, Minimize2, Maximize2, Bot, User,
   CheckCircle2, Loader2, Workflow, Mail, CreditCard, Share2,
-  Brain, RefreshCw, LogOut,
+  Brain, RefreshCw, LogOut, ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
