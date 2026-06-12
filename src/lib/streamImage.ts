@@ -10,6 +10,7 @@ export async function streamImage(
   prompt: string,
   token: string,
   onFrame: (dataUrl: string, isFinal: boolean) => void,
+  image?: string,
 ): Promise<void> {
   const res = await fetch(endpoint, {
     method: "POST",
@@ -17,7 +18,7 @@ export async function streamImage(
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ prompt }),
+    body: JSON.stringify(image ? { prompt, image } : { prompt }),
   });
   if (!res.ok || !res.body) {
     throw new Error(await res.text().catch(() => `Image generation failed: ${res.status}`));
