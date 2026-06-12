@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
+import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
@@ -8,7 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
   Sparkles, Image as ImageIcon, Wand2, Upload, Film, RefreshCw,
-  Loader2, KeyRound, LockOpen, ArrowLeft,
+  Loader2, KeyRound, LockOpen, ArrowLeft, Bot, User, Send, Square,
+  AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -17,7 +20,7 @@ export const Route = createFileRoute("/access")({
   head: () => ({
     meta: [
       { title: "Guest Access — SoloSync AI Studio" },
-      { name: "description", content: "Unlock the AI Image Studio with a PIN — no sign-in required." },
+      { name: "description", content: "Unlock the full AI Studio — images and SyncBot chat — with a PIN. No sign-in required." },
     ],
   }),
   component: GuestAccess,
@@ -67,7 +70,7 @@ function GuestAccess() {
             </div>
             <div>
               <h1 className="text-xl font-semibold text-white">Guest Access</h1>
-              <p className="text-xs text-slate-400">Enter your PIN to unlock the AI Studio — no sign-in needed.</p>
+              <p className="text-xs text-slate-400">Enter your PIN to unlock the full AI Studio — no sign-in needed.</p>
             </div>
           </div>
 
@@ -114,6 +117,34 @@ function GuestStudio({ pin, onLock }: { pin: string; onLock: () => void }) {
   const [animPlaying, setAnimPlaying] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const chatScrollRef = useRef<HTMLDivElement>(null);
+
+  // Chat (SyncBot) — via /api/public/chat with PIN
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: "/api/public/chat",
+        body: { pin },
+      }),
+    [pin],
+  );
+  const { messages, sendMessage, status, error, stop, regenerate } = useChat({
+    transport,
+    onError: (e) => toast.error(e.message || "SyncBot error"),
+  });
+  const [chatInput, setChatInput] = useState("");
+  const chatBusy = status === "submitted" || status === "streaming";
+
+  useEffect(() => {
+    chatScrollRef.current?.scrollTo({ top: chatScrollRef.current.scrollHeight, behavior: "smooth" });
+  }, [messages, chatBusy]);
+
+  const handleSendChat = useCallback(() => {
+    const text = chatInput.trim();
+    if (!text) return;
+    setChatInput("");
+    sendMessage({ text });
+  }, [chatInput, sendMessage]);
 
   const handleGenerate = async () => {
     if (!imgPrompt.trim()) return;
@@ -204,7 +235,7 @@ function GuestStudio({ pin, onLock }: { pin: string; onLock: () => void }) {
         </div>
       </header>
 
-      <main className="mx-auto max-w-[1400px] p-4 lg:p-6">
+      <main className="mx-auto max-w-[1400px] p-4 lg:p-6 space-y-6">
         <Card className="border-slate-200/80 shadow-lg overflow-hidden bg-gradient-to-br from-white via-violet-50/40 to-indigo-50/30">
           <div className="px-6 py-5 border-b border-slate-200/70 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -371,6 +402,118 @@ function GuestStudio({ pin, onLock }: { pin: string; onLock: () => void }) {
                     {animPlaying ? "Stop Animation" : "Play Animation"}
                   </Button>
                 </div>
+              )}
+            </div>
+          </div>
+        </Card>
+
+        {/* SyncBot Chat */}
+        <Card className="border-slate-200/80 shadow-sm overflow-hidden flex flex-col h-[640px]">
+          <div className="flex items-center justify-between border-b border-slate-200 px-5 py-3 bg-gradient-to-r from-white to-indigo-50/30">
+            <div className="flex items-center gap-2.5">
+              <div className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600">
+                <Bot className="h-4 w-4 text-white" />
+              </div>
+              <div className="leading-tight">
+                <h2 className="font-semibold text-sm">SyncBot</h2>
+                <p className="text-[11px] text-emerald-600 flex items-center gap-1">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Ready to chat about anything
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div ref={chatScrollRef} className="flex-1 overflow-y-auto px-4 py-5 space-y-4 bg-slate-50/30">
+            {messages.length === 0 && (
+              <div className="grid place-items-center h-full text-center">
+                <div className="max-w-md">
+                  <div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-2xl bg-violet-100">
+                    <Bot className="h-6 w-6 text-violet-600" />
+                  </div>
+                  <h3 className="text-base font-semibold mb-1">How can I help you today?</h3>
+                  <p className="text-xs text-slate-500 mb-4">Ask me anything — coding, writing, research, ideas, advice.</p>
+                  <div className="grid grid-cols-2 gap-2 text-left">
+                    {[
+                      "Explain quantum computing simply",
+                      "Write a Python web scraper",
+                      "Plan a 3-day trip to Tokyo",
+                      "Help me debug a React error",
+                    ].map((s) => (
+                      <button
+                        key={s}
+                        onClick={() => sendMessage({ text: s })}
+                        className="text-xs px-3 py-2 rounded-lg border border-slate-200 bg-white hover:border-violet-300 hover:bg-violet-50/40 text-slate-700 transition"
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+            {messages.map((m) => {
+              const text = m.parts.map((p) => (p.type === "text" ? p.text : "")).join("");
+              const isUser = m.role === "user";
+              return (
+                <div key={m.id} className={`flex gap-3 ${isUser ? "flex-row-reverse" : ""}`}>
+                  <div className={`grid h-7 w-7 shrink-0 place-items-center rounded-full ${isUser ? "bg-slate-800" : "bg-gradient-to-br from-indigo-500 to-violet-600"}`}>
+                    {isUser ? <User className="h-3.5 w-3.5 text-white" /> : <Bot className="h-3.5 w-3.5 text-white" />}
+                  </div>
+                  <div className={`rounded-2xl px-4 py-2.5 text-sm leading-relaxed max-w-[80%] whitespace-pre-wrap break-words ${isUser ? "bg-violet-600 text-white rounded-br-sm" : "bg-white border border-slate-200 text-slate-800 rounded-bl-sm shadow-sm"}`}>
+                    {text}
+                  </div>
+                </div>
+              );
+            })}
+            {status === "submitted" && (
+              <div className="flex gap-3">
+                <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-600">
+                  <Bot className="h-3.5 w-3.5 text-white" />
+                </div>
+                <div className="rounded-2xl px-4 py-2.5 bg-white border border-slate-200 text-slate-500 text-sm">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin inline" /> Thinking…
+                </div>
+              </div>
+            )}
+            {error && (
+              <div className="flex gap-3">
+                <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-red-100">
+                  <AlertCircle className="h-3.5 w-3.5 text-red-600" />
+                </div>
+                <div className="rounded-2xl px-4 py-3 bg-red-50 border border-red-200 text-red-800 text-sm max-w-[80%]">
+                  <div className="font-semibold mb-1">SyncBot error</div>
+                  <div className="whitespace-pre-wrap break-words">{error.message || "Something went wrong."}</div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => regenerate()}
+                    className="mt-2 h-7 text-xs border-red-300 text-red-700 hover:bg-red-100"
+                  >
+                    <RefreshCw className="h-3 w-3 mr-1" /> Retry
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="border-t border-slate-200 p-3 bg-white">
+            <div className="flex items-end gap-2">
+              <Textarea
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendChat(); } }}
+                placeholder="Message SyncBot…"
+                className="min-h-[44px] max-h-32 text-sm resize-none"
+                disabled={chatBusy}
+              />
+              {chatBusy ? (
+                <Button size="icon" onClick={() => stop()} className="h-11 w-11 shrink-0 bg-slate-800 hover:bg-slate-900" title="Stop">
+                  <Square className="h-4 w-4" />
+                </Button>
+              ) : (
+                <Button size="icon" onClick={handleSendChat} disabled={!chatInput.trim()} className="h-11 w-11 shrink-0 bg-violet-600 hover:bg-violet-700">
+                  <Send className="h-4 w-4" />
+                </Button>
               )}
             </div>
           </div>
