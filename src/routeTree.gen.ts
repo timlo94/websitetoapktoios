@@ -19,6 +19,7 @@ import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as ApiPublicGenerateImageRouteImport } from './routes/api/public/generate-image'
 import { Route as ApiPublicEditImageRouteImport } from './routes/api/public/edit-image'
+import { Route as ApiPublicChatRouteImport } from './routes/api/public/chat'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -69,6 +70,11 @@ const ApiPublicEditImageRoute = ApiPublicEditImageRouteImport.update({
   path: '/api/public/edit-image',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicChatRoute = ApiPublicChatRouteImport.update({
+  id: '/api/public/chat',
+  path: '/api/public/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
@@ -78,6 +84,7 @@ export interface FileRoutesByFullPath {
   '/api/chat': typeof ApiChatRoute
   '/api/edit-image': typeof ApiEditImageRoute
   '/api/generate-image': typeof ApiGenerateImageRoute
+  '/api/public/chat': typeof ApiPublicChatRoute
   '/api/public/edit-image': typeof ApiPublicEditImageRoute
   '/api/public/generate-image': typeof ApiPublicGenerateImageRoute
 }
@@ -89,6 +96,7 @@ export interface FileRoutesByTo {
   '/api/edit-image': typeof ApiEditImageRoute
   '/api/generate-image': typeof ApiGenerateImageRoute
   '/': typeof AuthenticatedIndexRoute
+  '/api/public/chat': typeof ApiPublicChatRoute
   '/api/public/edit-image': typeof ApiPublicEditImageRoute
   '/api/public/generate-image': typeof ApiPublicGenerateImageRoute
 }
@@ -102,6 +110,7 @@ export interface FileRoutesById {
   '/api/edit-image': typeof ApiEditImageRoute
   '/api/generate-image': typeof ApiGenerateImageRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/api/public/chat': typeof ApiPublicChatRoute
   '/api/public/edit-image': typeof ApiPublicEditImageRoute
   '/api/public/generate-image': typeof ApiPublicGenerateImageRoute
 }
@@ -115,6 +124,7 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/api/edit-image'
     | '/api/generate-image'
+    | '/api/public/chat'
     | '/api/public/edit-image'
     | '/api/public/generate-image'
   fileRoutesByTo: FileRoutesByTo
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/api/edit-image'
     | '/api/generate-image'
     | '/'
+    | '/api/public/chat'
     | '/api/public/edit-image'
     | '/api/public/generate-image'
   id:
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/api/edit-image'
     | '/api/generate-image'
     | '/_authenticated/'
+    | '/api/public/chat'
     | '/api/public/edit-image'
     | '/api/public/generate-image'
   fileRoutesById: FileRoutesById
@@ -149,6 +161,7 @@ export interface RootRouteChildren {
   ApiChatRoute: typeof ApiChatRoute
   ApiEditImageRoute: typeof ApiEditImageRoute
   ApiGenerateImageRoute: typeof ApiGenerateImageRoute
+  ApiPublicChatRoute: typeof ApiPublicChatRoute
   ApiPublicEditImageRoute: typeof ApiPublicEditImageRoute
   ApiPublicGenerateImageRoute: typeof ApiPublicGenerateImageRoute
 }
@@ -225,6 +238,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicEditImageRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/chat': {
+      id: '/api/public/chat'
+      path: '/api/public/chat'
+      fullPath: '/api/public/chat'
+      preLoaderRoute: typeof ApiPublicChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -248,6 +268,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiChatRoute: ApiChatRoute,
   ApiEditImageRoute: ApiEditImageRoute,
   ApiGenerateImageRoute: ApiGenerateImageRoute,
+  ApiPublicChatRoute: ApiPublicChatRoute,
   ApiPublicEditImageRoute: ApiPublicEditImageRoute,
   ApiPublicGenerateImageRoute: ApiPublicGenerateImageRoute,
 }
