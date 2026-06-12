@@ -73,12 +73,65 @@ function Workspace() {
     [],
   );
 
-  const { messages, sendMessage, status, error, stop, regenerate } = useChat({
+  const { messages, sendMessage, status, error, stop, regenerate, setMessages } = useChat({
     transport,
     onError: (e) => toast.error(e.message || "SyncBot error"),
   });
   const [chatInput, setChatInput] = useState("");
   const chatBusy = status === "submitted" || status === "streaming";
+
+  // Load chat history + image history on sign in
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data: sess } = await supabase.auth.getSession();
+      if (!sess.session?.user) return;
+      const [chatRes, imgRes] = await Promise.all([
+        supabase
+          .from("chat_messages")
+          .select("id, role, content, created_at")
+          .order("created_at", { ascending: true })
+          .limit(200),
+        supabase
+          .from("generated_images")
+          .select("id, prompt, kind, image_url, created_at")
+          .order("created_at", { ascending: false })
+          .limit(30),
+      ]);
+      if (cancelled) return;
+      if (chatRes.data && chatRes.data.length > 0) {
+        const hist: UIMessage[] = chatRes.data.map((r) => ({
+          id: r.id,
+          role: r.role === "assistant" ? "assistant" : "user",
+          parts: [{ type: "text", text: r.content }],
+        }));
+        setMessages(hist);
+      }
+      if (imgRes.data) setImageHistory(imgRes.data as ImageRow[]);
+      setHistoryLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [setMessages]);
+
+  const saveImageToHistory = useCallback(async (dataUrl: string, prompt: string, kind: string) => {
+    const { data: sess } = await supabase.auth.getSession();
+    const uid = sess.session?.user.id;
+    if (!uid) return;
+    const { data, error: e } = await supabase
+      .from("generated_images")
+      .insert({ user_id: uid, prompt, kind, storage_path: "", image_url: dataUrl })
+      .select("id, prompt, kind, image_url, created_at")
+      .single();
+    if (e) { console.error("[history] save failed:", e.message); return; }
+    if (data) setImageHistory((prev) => [data as ImageRow, ...prev].slice(0, 30));
+  }, []);
+
+  const deleteImageFromHistory = useCallback(async (id: string) => {
+    const prev = imageHistory;
+    setImageHistory((cur) => cur.filter((r) => r.id !== id));
+    const { error: e } = await supabase.from("generated_images").delete().eq("id", id);
+    if (e) { setImageHistory(prev); toast.error("Failed to delete"); }
+  }, [imageHistory]);
 
   useEffect(() => {
     chatScrollRef.current?.scrollTo({ top: chatScrollRef.current.scrollHeight, behavior: "smooth" });
