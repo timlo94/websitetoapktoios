@@ -27,7 +27,7 @@ export const Route = createFileRoute("/_authenticated/")({
   component: Workspace,
 });
 
-const SAMPLE_BRIEF = `Hey! So Acme Bakery reached out — they want a full rebrand proposal. Budget around $2000, need it in about 30 days. Make it sound professional but warm. They mentioned wanting social media templates too. Contact is Sarah, sarah@acmebakery.com.`;
+
 
 function Workspace() {
   const navigate = useNavigate();
