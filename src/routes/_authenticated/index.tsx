@@ -146,10 +146,12 @@ function Workspace() {
     setImgFinal(false);
     try {
       const { streamImage } = await import("@/lib/streamImage");
+      let finalUrl: string | null = null;
       await streamImage("/api/generate-image", imgPrompt, token, (dataUrl, isFinal) => {
         setImgUrl(dataUrl);
-        if (isFinal) setImgFinal(true);
+        if (isFinal) { setImgFinal(true); finalUrl = dataUrl; }
       });
+      if (finalUrl) saveImageToHistory(finalUrl, imgPrompt, "generated");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Image generation failed");
     } finally {
@@ -168,6 +170,7 @@ function Workspace() {
       setImgFinal(true);
       setAnimPlaying(false);
       toast.success("Image uploaded — refine or animate it below");
+      saveImageToHistory(result, file.name || "uploaded", "uploaded");
     };
     reader.readAsDataURL(file);
   };
@@ -180,11 +183,13 @@ function Workspace() {
     setImgFinal(false);
     try {
       const { streamImage } = await import("@/lib/streamImage");
+      let finalUrl: string | null = null;
       await streamImage("/api/edit-image", refinePrompt, token, (dataUrl, isFinal) => {
         setImgUrl(dataUrl);
-        if (isFinal) setImgFinal(true);
+        if (isFinal) { setImgFinal(true); finalUrl = dataUrl; }
       }, imgUrl);
       toast.success("Image refined");
+      if (finalUrl) saveImageToHistory(finalUrl, refinePrompt, "refined");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Refine failed");
       setImgFinal(true);
