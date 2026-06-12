@@ -476,15 +476,7 @@ function InsightRow({ k, v }: { k: string; v: string | null }) {
   );
 }
 
-function WorkflowItem({ icon, label, checked, onChange }: { icon: React.ReactNode; label: string; checked: boolean; onChange: (v: boolean) => void }) {
-  return (
-    <label className="flex items-center gap-2.5 rounded-lg border border-slate-200 bg-white px-3 py-2 cursor-pointer hover:border-violet-300 hover:bg-violet-50/30 transition">
-      <Checkbox checked={checked} onCheckedChange={(v) => onChange(!!v)} />
-      {icon}
-      <span className="text-xs font-medium text-slate-700">{label}</span>
-    </label>
-  );
-}
+
 
 function MarkdownLite({ text }: { text: string }) {
   const lines = text.split("\n");
