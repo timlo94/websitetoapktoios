@@ -90,7 +90,10 @@ export const extractInsights = createServerFn({ method: "POST" })
         extracted_json: parsed,
         title: parsed.client_name ?? "Untitled brief",
       }).select("id").single();
-      if (error) throw new Error(error.message);
+      if (error) {
+        console.error("[DB] brief insert failed:", error);
+        throw new Error("Failed to save brief. Please try again.");
+      }
       briefId = row.id;
     }
     return { insights: parsed, briefId };
