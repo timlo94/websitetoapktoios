@@ -16,7 +16,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import {
   Sparkles, Upload, FileText, Zap, Send, Image as ImageIcon,
   Wand2, Minimize2, Maximize2, Bot, User,
-  CheckCircle2, Loader2, Workflow, Mail, CreditCard, Share2,
+  CheckCircle2, Loader2, Mail,
   Brain, RefreshCw, LogOut, ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
