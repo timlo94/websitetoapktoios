@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
+import { DefaultChatTransport, type UIMessage } from "ai";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
@@ -11,7 +11,7 @@ import {
   Sparkles, Zap, Send, Image as ImageIcon,
   Wand2, Bot, User, Upload, Film, RefreshCw,
   Loader2, AlertCircle, Square,
-  LogOut, ShieldCheck,
+  LogOut, ShieldCheck, History, Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -45,6 +45,10 @@ function Workspace() {
 
   const chatScrollRef = useRef<HTMLDivElement>(null);
 
+  type ImageRow = { id: string; prompt: string; kind: string; image_url: string; created_at: string };
+  const [imageHistory, setImageHistory] = useState<ImageRow[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       setToken(data.session?.access_token ?? "");
@@ -69,12 +73,65 @@ function Workspace() {
     [],
   );
 
-  const { messages, sendMessage, status, error, stop, regenerate } = useChat({
+  const { messages, sendMessage, status, error, stop, regenerate, setMessages } = useChat({
     transport,
     onError: (e) => toast.error(e.message || "SyncBot error"),
   });
   const [chatInput, setChatInput] = useState("");
   const chatBusy = status === "submitted" || status === "streaming";
+
+  // Load chat history + image history on sign in
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data: sess } = await supabase.auth.getSession();
+      if (!sess.session?.user) return;
+      const [chatRes, imgRes] = await Promise.all([
+        supabase
+          .from("chat_messages")
+          .select("id, role, content, created_at")
+          .order("created_at", { ascending: true })
+          .limit(200),
+        supabase
+          .from("generated_images")
+          .select("id, prompt, kind, image_url, created_at")
+          .order("created_at", { ascending: false })
+          .limit(30),
+      ]);
+      if (cancelled) return;
+      if (chatRes.data && chatRes.data.length > 0) {
+        const hist: UIMessage[] = chatRes.data.map((r) => ({
+          id: r.id,
+          role: r.role === "assistant" ? "assistant" : "user",
+          parts: [{ type: "text", text: r.content }],
+        }));
+        setMessages(hist);
+      }
+      if (imgRes.data) setImageHistory(imgRes.data as ImageRow[]);
+      setHistoryLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [setMessages]);
+
+  const saveImageToHistory = useCallback(async (dataUrl: string, prompt: string, kind: string) => {
+    const { data: sess } = await supabase.auth.getSession();
+    const uid = sess.session?.user.id;
+    if (!uid) return;
+    const { data, error: e } = await supabase
+      .from("generated_images")
+      .insert({ user_id: uid, prompt, kind, storage_path: "", image_url: dataUrl })
+      .select("id, prompt, kind, image_url, created_at")
+      .single();
+    if (e) { console.error("[history] save failed:", e.message); return; }
+    if (data) setImageHistory((prev) => [data as ImageRow, ...prev].slice(0, 30));
+  }, []);
+
+  const deleteImageFromHistory = useCallback(async (id: string) => {
+    const prev = imageHistory;
+    setImageHistory((cur) => cur.filter((r) => r.id !== id));
+    const { error: e } = await supabase.from("generated_images").delete().eq("id", id);
+    if (e) { setImageHistory(prev); toast.error("Failed to delete"); }
+  }, [imageHistory]);
 
   useEffect(() => {
     chatScrollRef.current?.scrollTo({ top: chatScrollRef.current.scrollHeight, behavior: "smooth" });
@@ -89,10 +146,12 @@ function Workspace() {
     setImgFinal(false);
     try {
       const { streamImage } = await import("@/lib/streamImage");
+      let finalUrl: string | null = null;
       await streamImage("/api/generate-image", imgPrompt, token, (dataUrl, isFinal) => {
         setImgUrl(dataUrl);
-        if (isFinal) setImgFinal(true);
+        if (isFinal) { setImgFinal(true); finalUrl = dataUrl; }
       });
+      if (finalUrl) saveImageToHistory(finalUrl, imgPrompt, "generated");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Image generation failed");
     } finally {
@@ -111,6 +170,7 @@ function Workspace() {
       setImgFinal(true);
       setAnimPlaying(false);
       toast.success("Image uploaded — refine or animate it below");
+      saveImageToHistory(result, file.name || "uploaded", "uploaded");
     };
     reader.readAsDataURL(file);
   };
@@ -123,11 +183,13 @@ function Workspace() {
     setImgFinal(false);
     try {
       const { streamImage } = await import("@/lib/streamImage");
+      let finalUrl: string | null = null;
       await streamImage("/api/edit-image", refinePrompt, token, (dataUrl, isFinal) => {
         setImgUrl(dataUrl);
-        if (isFinal) setImgFinal(true);
+        if (isFinal) { setImgFinal(true); finalUrl = dataUrl; }
       }, imgUrl);
       toast.success("Image refined");
+      if (finalUrl) saveImageToHistory(finalUrl, refinePrompt, "refined");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Refine failed");
       setImgFinal(true);
@@ -350,6 +412,68 @@ function Workspace() {
             </div>
           </Card>
         </section>
+
+        {/* IMAGE HISTORY */}
+        <section>
+          <Card className="border-slate-200/80 shadow-sm overflow-hidden">
+            <div className="flex items-center justify-between border-b border-slate-200 px-5 py-3 bg-gradient-to-r from-white to-violet-50/30">
+              <div className="flex items-center gap-2.5">
+                <div className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600">
+                  <History className="h-4 w-4 text-white" />
+                </div>
+                <div className="leading-tight">
+                  <h2 className="font-semibold text-sm">Your Image History</h2>
+                  <p className="text-[11px] text-slate-500">Click any image to load it back into the studio.</p>
+                </div>
+              </div>
+              <Badge variant="secondary" className="bg-slate-100 text-slate-600">{imageHistory.length} saved</Badge>
+            </div>
+            <div className="p-5">
+              {historyLoading ? (
+                <div className="grid place-items-center py-10 text-slate-400">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                </div>
+              ) : imageHistory.length === 0 ? (
+                <div className="text-center py-10 text-slate-400 text-sm">
+                  No images yet — generate or upload one above to start your history.
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                  {imageHistory.map((row) => (
+                    <div key={row.id} className="group relative aspect-square rounded-lg overflow-hidden border border-slate-200 bg-slate-100">
+                      <img
+                        src={row.image_url}
+                        alt={row.prompt}
+                        className="h-full w-full object-cover cursor-pointer transition group-hover:scale-105"
+                        onClick={() => {
+                          setImgUrl(row.image_url);
+                          setImgFinal(true);
+                          setAnimPlaying(false);
+                          if (row.prompt) setImgPrompt(row.prompt);
+                          toast.success("Loaded into studio");
+                        }}
+                      />
+                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-2 opacity-0 group-hover:opacity-100 transition">
+                        <p className="text-[10px] text-white line-clamp-2">{row.prompt || row.kind}</p>
+                      </div>
+                      <span className="absolute top-1.5 left-1.5 text-[9px] px-1.5 py-0.5 rounded-full bg-white/90 text-slate-700 font-medium capitalize">
+                        {row.kind}
+                      </span>
+                      <button
+                        onClick={() => deleteImageFromHistory(row.id)}
+                        className="absolute top-1.5 right-1.5 grid h-6 w-6 place-items-center rounded-full bg-white/90 text-red-600 opacity-0 group-hover:opacity-100 hover:bg-white transition"
+                        title="Delete"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </Card>
+        </section>
+
 
         {/* CHAT (web-style) */}
         <section className="grid grid-cols-1 gap-6">
