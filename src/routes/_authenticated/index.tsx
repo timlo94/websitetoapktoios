@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import {
   Sparkles, Zap, Send, Image as ImageIcon,
-  Wand2, Bot, User,
+  Wand2, Bot, User, Upload, Film, RefreshCw,
   Loader2,
   LogOut, ShieldCheck,
 } from "lucide-react";
