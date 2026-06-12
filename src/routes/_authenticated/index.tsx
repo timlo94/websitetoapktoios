@@ -20,8 +20,8 @@ export const Route = createFileRoute("/_authenticated/")({
   codeSplitGroupings: [],
   head: () => ({
     meta: [
-      { title: "SoloSync — Chief of Staff for Solopreneurs" },
-      { name: "description", content: "Auto-Drafter: extract insights, generate drafts, and automate post-draft workflows in one AI workspace." },
+      { title: "SoloSync — AI Image Studio & Chat" },
+      { name: "description", content: "Generate stunning AI images and chat with SyncBot in one intelligent workspace." },
     ],
   }),
   component: Workspace,
@@ -113,7 +113,7 @@ function Workspace() {
             </div>
             <div className="leading-tight">
               <h1 className="text-base font-bold tracking-tight">SoloSync</h1>
-              <p className="text-[11px] text-slate-500">Chief of Staff · Auto-Drafter</p>
+              <p className="text-[11px] text-slate-500">AI Image Studio · SyncBot Chat</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -221,10 +221,10 @@ function Workspace() {
           </Card>
         </section>
 
-        {/* CHAT (web-style) + Brief/Draft tools */}
-        <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* CHAT (web-style) */}
+        <section className="grid grid-cols-1 gap-6">
           {/* CHAT - main */}
-          <Card className="lg:col-span-8 border-slate-200/80 shadow-sm overflow-hidden flex flex-col h-[640px]">
+          <Card className="border-slate-200/80 shadow-sm overflow-hidden flex flex-col h-[640px]">
             <div className="flex items-center justify-between border-b border-slate-200 px-5 py-3 bg-gradient-to-r from-white to-indigo-50/30">
               <div className="flex items-center gap-2.5">
                 <div className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600">
@@ -315,15 +315,6 @@ function Workspace() {
   );
 }
 
-function InsightRow({ k, v }: { k: string; v: string | null }) {
-  if (!v) return null;
-  return (
-    <div className="flex items-start justify-between gap-2 rounded-md bg-slate-50 px-2.5 py-1.5 text-xs">
-      <span className="font-medium text-slate-500">{k}</span>
-      <span className="text-slate-900 text-right font-medium">{v}</span>
-    </div>
-  );
-}
 
 
 
