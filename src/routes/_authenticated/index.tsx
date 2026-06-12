@@ -413,6 +413,68 @@ function Workspace() {
           </Card>
         </section>
 
+        {/* IMAGE HISTORY */}
+        <section>
+          <Card className="border-slate-200/80 shadow-sm overflow-hidden">
+            <div className="flex items-center justify-between border-b border-slate-200 px-5 py-3 bg-gradient-to-r from-white to-violet-50/30">
+              <div className="flex items-center gap-2.5">
+                <div className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600">
+                  <History className="h-4 w-4 text-white" />
+                </div>
+                <div className="leading-tight">
+                  <h2 className="font-semibold text-sm">Your Image History</h2>
+                  <p className="text-[11px] text-slate-500">Click any image to load it back into the studio.</p>
+                </div>
+              </div>
+              <Badge variant="secondary" className="bg-slate-100 text-slate-600">{imageHistory.length} saved</Badge>
+            </div>
+            <div className="p-5">
+              {historyLoading ? (
+                <div className="grid place-items-center py-10 text-slate-400">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                </div>
+              ) : imageHistory.length === 0 ? (
+                <div className="text-center py-10 text-slate-400 text-sm">
+                  No images yet — generate or upload one above to start your history.
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                  {imageHistory.map((row) => (
+                    <div key={row.id} className="group relative aspect-square rounded-lg overflow-hidden border border-slate-200 bg-slate-100">
+                      <img
+                        src={row.image_url}
+                        alt={row.prompt}
+                        className="h-full w-full object-cover cursor-pointer transition group-hover:scale-105"
+                        onClick={() => {
+                          setImgUrl(row.image_url);
+                          setImgFinal(true);
+                          setAnimPlaying(false);
+                          if (row.prompt) setImgPrompt(row.prompt);
+                          toast.success("Loaded into studio");
+                        }}
+                      />
+                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-2 opacity-0 group-hover:opacity-100 transition">
+                        <p className="text-[10px] text-white line-clamp-2">{row.prompt || row.kind}</p>
+                      </div>
+                      <span className="absolute top-1.5 left-1.5 text-[9px] px-1.5 py-0.5 rounded-full bg-white/90 text-slate-700 font-medium capitalize">
+                        {row.kind}
+                      </span>
+                      <button
+                        onClick={() => deleteImageFromHistory(row.id)}
+                        className="absolute top-1.5 right-1.5 grid h-6 w-6 place-items-center rounded-full bg-white/90 text-red-600 opacity-0 group-hover:opacity-100 hover:bg-white transition"
+                        title="Delete"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </Card>
+        </section>
+
+
         {/* CHAT (web-style) */}
         <section className="grid grid-cols-1 gap-6">
           {/* CHAT - main */}
