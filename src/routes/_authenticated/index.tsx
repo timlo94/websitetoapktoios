@@ -445,9 +445,15 @@ function Workspace() {
                   disabled={chatBusy}
                   autoFocus
                 />
-                <Button size="icon" onClick={handleSendChat} disabled={chatBusy || !chatInput.trim()} className="h-11 w-11 shrink-0 bg-violet-600 hover:bg-violet-700">
-                  <Send className="h-4 w-4" />
-                </Button>
+                {chatBusy ? (
+                  <Button size="icon" onClick={() => stop()} className="h-11 w-11 shrink-0 bg-slate-800 hover:bg-slate-900" title="Stop">
+                    <Square className="h-4 w-4" />
+                  </Button>
+                ) : (
+                  <Button size="icon" onClick={handleSendChat} disabled={!chatInput.trim()} className="h-11 w-11 shrink-0 bg-violet-600 hover:bg-violet-700">
+                    <Send className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
             </div>
           </Card>
