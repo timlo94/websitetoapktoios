@@ -24,6 +24,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { extractInsights, generateDraft, transformDraft, type Insights } from "@/lib/ai.functions";
 
 export const Route = createFileRoute("/_authenticated/")({
+  codeSplitGroupings: [],
   head: () => ({
     meta: [
       { title: "SoloSync — Chief of Staff for Solopreneurs" },
