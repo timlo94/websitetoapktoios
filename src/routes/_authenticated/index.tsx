@@ -11,7 +11,7 @@ import {
   Sparkles, Zap, Send, Image as ImageIcon,
   Wand2, Bot, User, Upload, Film, RefreshCw,
   Loader2, AlertCircle, Square,
-  LogOut, ShieldCheck,
+  LogOut, ShieldCheck, History, Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
