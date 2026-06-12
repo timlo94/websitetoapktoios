@@ -93,6 +93,42 @@ function Workspace() {
     }
   };
 
+  const handleUploadImage = (file: File) => {
+    if (!file.type.startsWith("image/")) { toast.error("Please choose an image file"); return; }
+    if (file.size > 6 * 1024 * 1024) { toast.error("Image too large (max 6MB)"); return; }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = typeof reader.result === "string" ? reader.result : null;
+      if (!result) return;
+      setImgUrl(result);
+      setImgFinal(true);
+      setAnimPlaying(false);
+      toast.success("Image uploaded — refine or animate it below");
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRefineImage = async () => {
+    if (!token) { toast.error("Not signed in"); return; }
+    if (!imgUrl) { toast.error("Upload or generate an image first"); return; }
+    if (!refinePrompt.trim()) { toast.error("Describe how to refine the image"); return; }
+    setRefining(true);
+    setImgFinal(false);
+    try {
+      const { streamImage } = await import("@/lib/streamImage");
+      await streamImage("/api/edit-image", refinePrompt, token, (dataUrl, isFinal) => {
+        setImgUrl(dataUrl);
+        if (isFinal) setImgFinal(true);
+      }, imgUrl);
+      toast.success("Image refined");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Refine failed");
+      setImgFinal(true);
+    } finally {
+      setRefining(false);
+    }
+  };
+
   const handleSendChat = useCallback(() => {
     const text = chatInput.trim();
     if (!text) return;
