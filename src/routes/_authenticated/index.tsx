@@ -45,6 +45,10 @@ function Workspace() {
 
   const chatScrollRef = useRef<HTMLDivElement>(null);
 
+  type ImageRow = { id: string; prompt: string; kind: string; image_url: string; created_at: string };
+  const [imageHistory, setImageHistory] = useState<ImageRow[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       setToken(data.session?.access_token ?? "");
