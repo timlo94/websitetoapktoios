@@ -413,6 +413,25 @@ function Workspace() {
                   </div>
                 </div>
               )}
+              {error && (
+                <div className="flex gap-3">
+                  <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-red-100">
+                    <AlertCircle className="h-3.5 w-3.5 text-red-600" />
+                  </div>
+                  <div className="rounded-2xl px-4 py-3 bg-red-50 border border-red-200 text-red-800 text-sm max-w-[80%]">
+                    <div className="font-semibold mb-1">SyncBot error</div>
+                    <div className="whitespace-pre-wrap break-words">{error.message || "Something went wrong."}</div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => regenerate()}
+                      className="mt-2 h-7 text-xs border-red-300 text-red-700 hover:bg-red-100"
+                    >
+                      <RefreshCw className="h-3 w-3 mr-1" /> Retry
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="border-t border-slate-200 p-3 bg-white">
