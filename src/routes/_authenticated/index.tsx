@@ -37,6 +37,11 @@ function Workspace() {
   const [imgPrompt, setImgPrompt] = useState("artisan bakery hero image, warm tones");
   const [imgUrl, setImgUrl] = useState<string | null>(null);
   const [imgLoading, setImgLoading] = useState(false);
+  const [refinePrompt, setRefinePrompt] = useState("");
+  const [refining, setRefining] = useState(false);
+  const [animStyle, setAnimStyle] = useState<"kenburns" | "panLeft" | "panRight" | "zoomIn" | "float">("kenburns");
+  const [animPlaying, setAnimPlaying] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const chatScrollRef = useRef<HTMLDivElement>(null);
 
