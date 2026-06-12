@@ -10,16 +10,24 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AccessRouteImport } from './routes/access'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as ApiGenerateImageRouteImport } from './routes/api/generate-image'
 import { Route as ApiEditImageRouteImport } from './routes/api/edit-image'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as ApiPublicGenerateImageRouteImport } from './routes/api/public/generate-image'
+import { Route as ApiPublicEditImageRouteImport } from './routes/api/public/edit-image'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccessRoute = AccessRouteImport.update({
+  id: '/access',
+  path: '/access',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
@@ -51,67 +59,98 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicGenerateImageRoute = ApiPublicGenerateImageRouteImport.update({
+  id: '/api/public/generate-image',
+  path: '/api/public/generate-image',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicEditImageRoute = ApiPublicEditImageRouteImport.update({
+  id: '/api/public/edit-image',
+  path: '/api/public/edit-image',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
+  '/access': typeof AccessRoute
   '/auth': typeof AuthRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/api/chat': typeof ApiChatRoute
   '/api/edit-image': typeof ApiEditImageRoute
   '/api/generate-image': typeof ApiGenerateImageRoute
+  '/api/public/edit-image': typeof ApiPublicEditImageRoute
+  '/api/public/generate-image': typeof ApiPublicGenerateImageRoute
 }
 export interface FileRoutesByTo {
+  '/access': typeof AccessRoute
   '/auth': typeof AuthRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/api/chat': typeof ApiChatRoute
   '/api/edit-image': typeof ApiEditImageRoute
   '/api/generate-image': typeof ApiGenerateImageRoute
   '/': typeof AuthenticatedIndexRoute
+  '/api/public/edit-image': typeof ApiPublicEditImageRoute
+  '/api/public/generate-image': typeof ApiPublicGenerateImageRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/access': typeof AccessRoute
   '/auth': typeof AuthRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/api/chat': typeof ApiChatRoute
   '/api/edit-image': typeof ApiEditImageRoute
   '/api/generate-image': typeof ApiGenerateImageRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/api/public/edit-image': typeof ApiPublicEditImageRoute
+  '/api/public/generate-image': typeof ApiPublicGenerateImageRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/access'
     | '/auth'
     | '/admin'
     | '/api/chat'
     | '/api/edit-image'
     | '/api/generate-image'
+    | '/api/public/edit-image'
+    | '/api/public/generate-image'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/access'
     | '/auth'
     | '/admin'
     | '/api/chat'
     | '/api/edit-image'
     | '/api/generate-image'
     | '/'
+    | '/api/public/edit-image'
+    | '/api/public/generate-image'
   id:
     | '__root__'
     | '/_authenticated'
+    | '/access'
     | '/auth'
     | '/_authenticated/admin'
     | '/api/chat'
     | '/api/edit-image'
     | '/api/generate-image'
     | '/_authenticated/'
+    | '/api/public/edit-image'
+    | '/api/public/generate-image'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AccessRoute: typeof AccessRoute
   AuthRoute: typeof AuthRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiEditImageRoute: typeof ApiEditImageRoute
   ApiGenerateImageRoute: typeof ApiGenerateImageRoute
+  ApiPublicEditImageRoute: typeof ApiPublicEditImageRoute
+  ApiPublicGenerateImageRoute: typeof ApiPublicGenerateImageRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -121,6 +160,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/access': {
+      id: '/access'
+      path: '/access'
+      fullPath: '/access'
+      preLoaderRoute: typeof AccessRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -165,6 +211,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/generate-image': {
+      id: '/api/public/generate-image'
+      path: '/api/public/generate-image'
+      fullPath: '/api/public/generate-image'
+      preLoaderRoute: typeof ApiPublicGenerateImageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/edit-image': {
+      id: '/api/public/edit-image'
+      path: '/api/public/edit-image'
+      fullPath: '/api/public/edit-image'
+      preLoaderRoute: typeof ApiPublicEditImageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -183,10 +243,13 @@ const AuthenticatedRouteRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AccessRoute: AccessRoute,
   AuthRoute: AuthRoute,
   ApiChatRoute: ApiChatRoute,
   ApiEditImageRoute: ApiEditImageRoute,
   ApiGenerateImageRoute: ApiGenerateImageRoute,
+  ApiPublicEditImageRoute: ApiPublicEditImageRoute,
+  ApiPublicGenerateImageRoute: ApiPublicGenerateImageRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

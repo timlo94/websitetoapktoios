@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { Sparkles, Loader2 } from "lucide-react";
+import { Sparkles, Loader2, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/auth")({
@@ -105,6 +105,17 @@ function AuthPage() {
         <button onClick={() => setMode(mode === "signin" ? "signup" : "signin")} className="mt-4 text-sm text-slate-400 hover:text-slate-200 w-full text-center">
           {mode === "signin" ? "No account? Sign up" : "Have an account? Sign in"}
         </button>
+
+        <div className="relative my-5">
+          <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-slate-800" /></div>
+          <div className="relative flex justify-center text-xs"><span className="bg-slate-900 px-2 text-slate-500">or skip sign-in</span></div>
+        </div>
+
+        <Link to="/access" className="block">
+          <Button variant="outline" className="w-full border-violet-500/40 bg-violet-500/10 text-violet-200 hover:bg-violet-500/20 hover:text-white">
+            <KeyRound className="mr-2 h-4 w-4" /> Guest access with PIN
+          </Button>
+        </Link>
       </Card>
     </div>
   );
