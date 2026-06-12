@@ -139,10 +139,9 @@ function Workspace() {
   const handleSendChat = useCallback(() => {
     const text = chatInput.trim();
     if (!text) return;
-    if (!token) { toast.error("Signing you in… try again in a moment"); return; }
     setChatInput("");
     sendMessage({ text });
-  }, [chatInput, sendMessage, token]);
+  }, [chatInput, sendMessage]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
