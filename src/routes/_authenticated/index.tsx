@@ -2,24 +2,19 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Sparkles, Upload, FileText, Zap, Send, Image as ImageIcon,
-  Wand2, Minimize2, Maximize2, Bot, User,
-  CheckCircle2, Loader2,
-  Brain, RefreshCw, LogOut, ShieldCheck,
+  Sparkles, Zap, Send, Image as ImageIcon,
+  Wand2, Bot, User,
+  Loader2,
+  LogOut, ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { extractInsights, generateDraft, transformDraft, type Insights } from "@/lib/ai.functions";
 
 export const Route = createFileRoute("/_authenticated/")({
   codeSplitGroupings: [],
@@ -39,30 +34,11 @@ function Workspace() {
   const [userEmail, setUserEmail] = useState<string>("");
   const [token, setToken] = useState<string>("");
 
-  // Left
-  const [briefText, setBriefText] = useState(SAMPLE_BRIEF);
-  const [briefId, setBriefId] = useState<string | undefined>();
-  const [extracting, setExtracting] = useState(false);
-  const [insights, setInsights] = useState<Insights | null>(null);
-  const [autoSync, setAutoSync] = useState(true);
-
-  // Center
-  const [generating, setGenerating] = useState(false);
-  const [draft, setDraft] = useState("");
   const [imgPrompt, setImgPrompt] = useState("artisan bakery hero image, warm tones");
   const [imgUrl, setImgUrl] = useState<string | null>(null);
   const [imgLoading, setImgLoading] = useState(false);
-  const [imgPopoverOpen, setImgPopoverOpen] = useState(false);
-
-  // Workflow
-  const [workflows, setWorkflows] = useState({ invoice: true, social: true, email: false });
-  const [automating, setAutomating] = useState(false);
-  const [automated, setAutomated] = useState(false);
 
   const chatScrollRef = useRef<HTMLDivElement>(null);
-  const extractFn = useServerFn(extractInsights);
-  const generateFn = useServerFn(generateDraft);
-  const transformFn = useServerFn(transformDraft);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -92,56 +68,6 @@ function Workspace() {
     chatScrollRef.current?.scrollTo({ top: chatScrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, chatBusy]);
 
-  const handleExtract = async () => {
-    if (!briefText.trim()) return;
-    setExtracting(true);
-    setInsights(null);
-    try {
-      const res = await extractFn({ data: { text: briefText, briefId } });
-      setInsights(res.insights);
-      setBriefId(res.briefId);
-      if (autoSync) toast.success("Synced to CRM");
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Extract failed");
-    } finally {
-      setExtracting(false);
-    }
-  };
-
-  const handleGenerate = async () => {
-    setGenerating(true);
-    setDraft("");
-    try {
-      const res = await generateFn({ data: { briefId, insights: insights ?? undefined, rawText: briefText } });
-      // Animate in
-      const text = res.content;
-      let i = 0;
-      const tick = () => {
-        i += 18;
-        setDraft(text.slice(0, i));
-        if (i < text.length) requestAnimationFrame(tick);
-        else setGenerating(false);
-      };
-      tick();
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Generation failed");
-      setGenerating(false);
-    }
-  };
-
-  const handleAiAction = async (action: "shorter" | "expand" | "warmer") => {
-    if (!draft) return;
-    setGenerating(true);
-    try {
-      const res = await transformFn({ data: { content: draft, action } });
-      setDraft(res.content);
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Transform failed");
-    } finally {
-      setGenerating(false);
-    }
-  };
-
   const [imgFinal, setImgFinal] = useState(false);
   const handleGenerateImage = async () => {
     if (!token) { toast.error("Not signed in"); return; }
@@ -169,12 +95,6 @@ function Workspace() {
     setChatInput("");
     sendMessage({ text });
   }, [chatInput, sendMessage, token]);
-
-  const handleAutomate = () => {
-    setAutomating(true);
-    setAutomated(false);
-    setTimeout(() => { setAutomating(false); setAutomated(true); }, 1500);
-  };
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
