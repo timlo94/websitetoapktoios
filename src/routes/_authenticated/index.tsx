@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Sparkles, Zap, Send, Image as ImageIcon,
   Wand2, Bot, User, Upload, Film, RefreshCw,
-  Loader2,
+  Loader2, AlertCircle, Square,
   LogOut, ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -62,9 +62,9 @@ function Workspace() {
     [token],
   );
 
-  const { messages, sendMessage, status } = useChat({
+  const { messages, sendMessage, status, error, stop, regenerate } = useChat({
     transport,
-    onError: (e) => toast.error(e.message),
+    onError: (e) => toast.error(e.message || "SyncBot error"),
   });
   const [chatInput, setChatInput] = useState("");
   const chatBusy = status === "submitted" || status === "streaming";
@@ -413,6 +413,25 @@ function Workspace() {
                   </div>
                 </div>
               )}
+              {error && (
+                <div className="flex gap-3">
+                  <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-red-100">
+                    <AlertCircle className="h-3.5 w-3.5 text-red-600" />
+                  </div>
+                  <div className="rounded-2xl px-4 py-3 bg-red-50 border border-red-200 text-red-800 text-sm max-w-[80%]">
+                    <div className="font-semibold mb-1">SyncBot error</div>
+                    <div className="whitespace-pre-wrap break-words">{error.message || "Something went wrong."}</div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => regenerate()}
+                      className="mt-2 h-7 text-xs border-red-300 text-red-700 hover:bg-red-100"
+                    >
+                      <RefreshCw className="h-3 w-3 mr-1" /> Retry
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="border-t border-slate-200 p-3 bg-white">
@@ -426,9 +445,15 @@ function Workspace() {
                   disabled={chatBusy}
                   autoFocus
                 />
-                <Button size="icon" onClick={handleSendChat} disabled={chatBusy || !chatInput.trim()} className="h-11 w-11 shrink-0 bg-violet-600 hover:bg-violet-700">
-                  <Send className="h-4 w-4" />
-                </Button>
+                {chatBusy ? (
+                  <Button size="icon" onClick={() => stop()} className="h-11 w-11 shrink-0 bg-slate-800 hover:bg-slate-900" title="Stop">
+                    <Square className="h-4 w-4" />
+                  </Button>
+                ) : (
+                  <Button size="icon" onClick={handleSendChat} disabled={!chatInput.trim()} className="h-11 w-11 shrink-0 bg-violet-600 hover:bg-violet-700">
+                    <Send className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
             </div>
           </Card>
