@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useServerFn } from "@tanstack/react-start";
@@ -72,10 +72,14 @@ function Workspace() {
   }, []);
 
   // Chat
-  const transport = token ? new DefaultChatTransport({
-    api: "/api/chat",
-    headers: { Authorization: `Bearer ${token}` },
-  }) : undefined;
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: "/api/chat",
+        headers: () => (token ? { Authorization: `Bearer ${token}` } : {} as Record<string, string>),
+      }),
+    [token],
+  );
 
   const { messages, sendMessage, status } = useChat({
     transport,
@@ -160,10 +164,11 @@ function Workspace() {
 
   const handleSendChat = useCallback(() => {
     const text = chatInput.trim();
-    if (!text || !transport) return;
+    if (!text) return;
+    if (!token) { toast.error("Signing you in… try again in a moment"); return; }
     setChatInput("");
     sendMessage({ text });
-  }, [chatInput, sendMessage, transport]);
+  }, [chatInput, sendMessage, token]);
 
   const handleAutomate = () => {
     setAutomating(true);
