@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Sparkles, Zap, Send, Image as ImageIcon,
   Wand2, Bot, User, Upload, Film, RefreshCw,
-  Loader2,
+  Loader2, AlertCircle, Square,
   LogOut, ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
