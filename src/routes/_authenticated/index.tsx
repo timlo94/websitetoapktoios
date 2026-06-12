@@ -206,243 +206,262 @@ function Workspace() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-[1600px] grid grid-cols-1 lg:grid-cols-12 gap-4 p-4 lg:p-6">
-        {/* LEFT */}
-        <section className="lg:col-span-3 space-y-4">
-          <Card className="p-5 border-slate-200/80 shadow-sm">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Brain className="h-4 w-4 text-violet-600" />
-                <h2 className="font-semibold text-sm">Raw Input & Context</h2>
-              </div>
-              <Badge variant="outline" className="text-[10px]">Inbox Tamer</Badge>
-            </div>
-
-            <div className="relative rounded-lg border-2 border-dashed border-slate-200 bg-slate-50/50 p-3 mb-3 transition hover:border-violet-300 hover:bg-violet-50/30">
-              <div className="flex items-center gap-2 text-xs text-slate-500 mb-2">
-                <Upload className="h-3.5 w-3.5" />
-                <span>Drop emails, briefs, or paste below</span>
-              </div>
-              <Textarea
-                value={briefText}
-                onChange={(e) => setBriefText(e.target.value)}
-                placeholder="Paste a messy client email…"
-                className="min-h-[140px] resize-none border-0 bg-white/80 text-xs focus-visible:ring-1 focus-visible:ring-violet-400"
-              />
-            </div>
-
-            <Button onClick={handleExtract} disabled={extracting || !briefText.trim()} className="w-full bg-violet-600 hover:bg-violet-700 text-white">
-              {extracting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Extracting…</> : <><Wand2 className="mr-2 h-4 w-4" /> Extract Insights</>}
-            </Button>
-
-            <div className="mt-4 flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2.5">
-              <Label htmlFor="autosync" className="text-xs font-medium text-slate-700 cursor-pointer">Auto-sync to CRM</Label>
-              <Switch id="autosync" checked={autoSync} onCheckedChange={setAutoSync} />
-            </div>
-          </Card>
-
-          {(extracting || insights) && (
-            <Card className="p-4 border-slate-200/80 shadow-sm animate-in fade-in slide-in-from-bottom-2 duration-500">
-              <div className="flex items-center gap-2 mb-3">
-                <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                <h3 className="text-xs font-semibold text-slate-700">Structured Insights</h3>
-              </div>
-              {extracting ? (
-                <div className="space-y-2">
-                  {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-7 w-full" />)}
+      <main className="mx-auto max-w-[1400px] p-4 lg:p-6 space-y-6">
+        {/* HERO: IMAGE GENERATION */}
+        <section>
+          <Card className="border-slate-200/80 shadow-lg overflow-hidden bg-gradient-to-br from-white via-violet-50/40 to-indigo-50/30">
+            <div className="px-6 py-5 border-b border-slate-200/70 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 shadow-md shadow-violet-500/30">
+                  <ImageIcon className="h-5 w-5 text-white" />
                 </div>
-              ) : insights && (
-                <div className="space-y-1.5">
-                  <InsightRow k="Client" v={insights.client_name} />
-                  <InsightRow k="Contact" v={insights.contact} />
-                  <InsightRow k="Budget" v={insights.budget} />
-                  <InsightRow k="Deadline" v={insights.deadline} />
-                  <InsightRow k="Tone" v={insights.tone} />
-                  <InsightRow k="Deliverables" v={insights.deliverables?.join(", ") ?? null} />
+                <div>
+                  <h2 className="text-lg font-bold tracking-tight">AI Image Studio</h2>
+                  <p className="text-xs text-slate-500">Describe anything — get a high-quality image in seconds.</p>
                 </div>
-              )}
-            </Card>
-          )}
-        </section>
-
-        {/* CENTER */}
-        <section className="lg:col-span-6 space-y-4">
-          <Card className="border-slate-200/80 shadow-sm overflow-hidden">
-            <div className="flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-white to-violet-50/30 px-5 py-3">
-              <div className="flex items-center gap-2">
-                <FileText className="h-4 w-4 text-indigo-600" />
-                <h2 className="font-semibold text-sm">Auto-Drafter</h2>
-                {insights?.client_name && <Badge variant="outline" className="text-[10px] ml-1">Proposal · {insights.client_name}</Badge>}
               </div>
-              <Button size="sm" onClick={handleGenerate} disabled={generating || !briefText.trim()} className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white shadow-sm">
-                {generating ? <><Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> Generating…</> : <><Sparkles className="mr-2 h-3.5 w-3.5" /> Generate Draft</>}
-              </Button>
+              <Badge variant="secondary" className="gap-1 bg-violet-100 text-violet-700">
+                <Sparkles className="h-3 w-3" /> gpt-image-2
+              </Badge>
             </div>
 
-            <div className="flex items-center gap-1.5 border-b border-slate-100 bg-slate-50/50 px-5 py-2">
-              <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold mr-1">AI Tools</span>
-              <Button size="sm" variant="ghost" className="h-7 text-xs gap-1.5" onClick={() => handleAiAction("shorter")} disabled={generating || !draft}>
-                <Minimize2 className="h-3 w-3" /> Make Shorter
-              </Button>
-              <Button size="sm" variant="ghost" className="h-7 text-xs gap-1.5" onClick={() => handleAiAction("warmer")} disabled={generating || !draft}>
-                <RefreshCw className="h-3 w-3" /> Change Tone
-              </Button>
-              <Button size="sm" variant="ghost" className="h-7 text-xs gap-1.5" onClick={() => handleAiAction("expand")} disabled={generating || !draft}>
-                <Maximize2 className="h-3 w-3" /> Expand
-              </Button>
-              <div className="h-4 w-px bg-slate-200 mx-1" />
-              <Popover open={imgPopoverOpen} onOpenChange={setImgPopoverOpen}>
-                <PopoverTrigger asChild>
-                  <Button size="sm" variant="ghost" className="h-7 text-xs gap-1.5 text-violet-700">
-                    <ImageIcon className="h-3 w-3" /> /image
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-80" align="start">
-                  <div className="space-y-3">
-                    <div>
-                      <h4 className="text-sm font-semibold">Generate Image Asset</h4>
-                      <p className="text-xs text-slate-500">Describe the image you want.</p>
-                    </div>
-                    <Input value={imgPrompt} onChange={(e) => setImgPrompt(e.target.value)} placeholder="e.g. minimalist bakery logo" className="text-xs" />
-                    <Button onClick={handleGenerateImage} disabled={imgLoading} size="sm" className="w-full bg-violet-600 hover:bg-violet-700 text-white">
-                      {imgLoading ? <><Loader2 className="mr-2 h-3 w-3 animate-spin" /> Generating…</> : <><Sparkles className="mr-2 h-3 w-3" /> Generate Asset</>}
-                    </Button>
-                    {imgLoading && !imgUrl && <Skeleton className="h-32 w-full rounded-md" />}
-                    {imgUrl && (
-                      <img
-                        src={imgUrl}
-                        alt="generated"
-                        className={`h-32 w-full rounded-md object-cover transition-[filter] ${imgFinal ? "blur-0" : "blur-md"}`}
-                      />
-                    )}
-                  </div>
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            <div className="p-6 min-h-[520px] bg-white">
-              {!draft && !generating && (
-                <div className="grid place-items-center h-[460px] text-center">
-                  <div>
-                    <div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-2xl bg-violet-100">
-                      <Sparkles className="h-6 w-6 text-violet-600" />
-                    </div>
-                    <h3 className="text-sm font-semibold mb-1">Your draft will appear here</h3>
-                    <p className="text-xs text-slate-500 max-w-xs">Extract insights on the left, then click <span className="font-medium text-slate-700">Generate Draft</span> to compose a real AI proposal.</p>
-                  </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
+              <div className="space-y-3">
+                <Label htmlFor="hero-img-prompt" className="text-sm font-semibold">Prompt</Label>
+                <Textarea
+                  id="hero-img-prompt"
+                  value={imgPrompt}
+                  onChange={(e) => setImgPrompt(e.target.value)}
+                  placeholder="e.g. a cinematic photo of a fox in a neon-lit Tokyo alley at night"
+                  className="min-h-[140px] resize-none text-sm bg-white"
+                />
+                <div className="flex flex-wrap gap-1.5">
+                  {[
+                    "minimalist logo for a coffee brand",
+                    "isometric 3d city, pastel colors",
+                    "portrait of a cyberpunk samurai",
+                    "watercolor mountain landscape",
+                  ].map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => setImgPrompt(p)}
+                      className="text-[11px] px-2 py-1 rounded-full bg-white border border-slate-200 text-slate-600 hover:border-violet-300 hover:text-violet-700 transition"
+                    >
+                      {p}
+                    </button>
+                  ))}
                 </div>
-              )}
-              {(draft || generating) && (
-                <div className="prose prose-sm max-w-none">
-                  <pre className="whitespace-pre-wrap font-sans text-[14px] leading-relaxed text-slate-800 bg-transparent border-0 p-0 m-0">{draft}{generating && <span className="inline-block w-2 h-4 bg-violet-600 ml-0.5 animate-pulse align-middle" />}</pre>
-                  {imgUrl && (
-                    <div className="my-4 rounded-lg overflow-hidden border border-slate-200">
-                      <img src={imgUrl} alt="asset" className="w-full max-h-64 object-cover" />
-                      <div className="px-3 py-1.5 bg-slate-50 text-[11px] text-slate-500 flex items-center gap-1.5">
-                        <ImageIcon className="h-3 w-3" /> Generated asset · {imgPrompt}
-                      </div>
-                    </div>
+                <Button
+                  onClick={handleGenerateImage}
+                  disabled={imgLoading || !imgPrompt.trim()}
+                  size="lg"
+                  className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white shadow-md shadow-violet-500/30"
+                >
+                  {imgLoading ? (
+                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating…</>
+                  ) : (
+                    <><Wand2 className="mr-2 h-4 w-4" /> Generate Image</>
                   )}
-                </div>
-              )}
+                </Button>
+              </div>
+
+              <div className="relative aspect-square rounded-xl bg-slate-100 border border-slate-200 overflow-hidden grid place-items-center">
+                {!imgUrl && !imgLoading && (
+                  <div className="text-center text-slate-400 px-6">
+                    <ImageIcon className="h-10 w-10 mx-auto mb-2 opacity-50" />
+                    <p className="text-xs">Your generated image will appear here</p>
+                  </div>
+                )}
+                {imgLoading && !imgUrl && (
+                  <div className="absolute inset-0 grid place-items-center bg-slate-100">
+                    <Loader2 className="h-8 w-8 text-violet-600 animate-spin" />
+                  </div>
+                )}
+                {imgUrl && (
+                  <img
+                    src={imgUrl}
+                    alt={imgPrompt}
+                    className={`h-full w-full object-cover transition-[filter] duration-300 ${imgFinal ? "blur-0" : "blur-xl"}`}
+                  />
+                )}
+                {imgUrl && imgFinal && (
+                  <a
+                    href={imgUrl}
+                    download="generated.png"
+                    className="absolute bottom-3 right-3 text-[11px] bg-white/95 hover:bg-white px-3 py-1.5 rounded-full shadow-md font-medium text-slate-700"
+                  >
+                    Download
+                  </a>
+                )}
+              </div>
             </div>
           </Card>
         </section>
 
-        {/* RIGHT */}
-        <section className="lg:col-span-3 space-y-4">
-          <Card className="border-slate-200/80 shadow-sm overflow-hidden flex flex-col h-[420px]">
-            <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 bg-gradient-to-r from-white to-indigo-50/30">
-              <div className="flex items-center gap-2">
-                <div className="grid h-7 w-7 place-items-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600">
+        {/* CHAT (web-style) + Brief/Draft tools */}
+        <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* CHAT - main */}
+          <Card className="lg:col-span-8 border-slate-200/80 shadow-sm overflow-hidden flex flex-col h-[640px]">
+            <div className="flex items-center justify-between border-b border-slate-200 px-5 py-3 bg-gradient-to-r from-white to-indigo-50/30">
+              <div className="flex items-center gap-2.5">
+                <div className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600">
                   <Bot className="h-4 w-4 text-white" />
                 </div>
                 <div className="leading-tight">
-                  <h2 className="font-semibold text-sm">SyncBot Assistant</h2>
-                  <p className="text-[10px] text-emerald-600 flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Live</p>
+                  <h2 className="font-semibold text-sm">SyncBot</h2>
+                  <p className="text-[11px] text-emerald-600 flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Ready to chat about anything</p>
                 </div>
               </div>
             </div>
 
-            <div ref={chatScrollRef} className="flex-1 overflow-y-auto p-3 space-y-3">
+            <div ref={chatScrollRef} className="flex-1 overflow-y-auto px-4 py-5 space-y-4 bg-slate-50/30">
               {messages.length === 0 && (
-                <div className="text-xs text-slate-500 p-2">
-                  Hi! I'm <strong>SyncBot</strong>. Ask me about contracts, pricing, or your client's project context.
+                <div className="grid place-items-center h-full text-center">
+                  <div className="max-w-md">
+                    <div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-2xl bg-violet-100">
+                      <Bot className="h-6 w-6 text-violet-600" />
+                    </div>
+                    <h3 className="text-base font-semibold mb-1">How can I help you today?</h3>
+                    <p className="text-xs text-slate-500 mb-4">Ask me anything — coding, writing, research, ideas, advice.</p>
+                    <div className="grid grid-cols-2 gap-2 text-left">
+                      {[
+                        "Explain quantum computing simply",
+                        "Write a Python web scraper",
+                        "Plan a 3-day trip to Tokyo",
+                        "Help me debug a React error",
+                      ].map((s) => (
+                        <button
+                          key={s}
+                          onClick={() => sendMessage({ text: s })}
+                          className="text-xs px-3 py-2 rounded-lg border border-slate-200 bg-white hover:border-violet-300 hover:bg-violet-50/40 text-slate-700 transition"
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               )}
               {messages.map((m) => {
                 const text = m.parts.map((p) => (p.type === "text" ? p.text : "")).join("");
                 const isUser = m.role === "user";
                 return (
-                  <div key={m.id} className={`flex gap-2 ${isUser ? "flex-row-reverse" : ""}`}>
-                    <div className={`grid h-6 w-6 shrink-0 place-items-center rounded-full ${isUser ? "bg-slate-800" : "bg-violet-100"}`}>
-                      {isUser ? <User className="h-3 w-3 text-white" /> : <Bot className="h-3 w-3 text-violet-700" />}
+                  <div key={m.id} className={`flex gap-3 ${isUser ? "flex-row-reverse" : ""}`}>
+                    <div className={`grid h-7 w-7 shrink-0 place-items-center rounded-full ${isUser ? "bg-slate-800" : "bg-gradient-to-br from-indigo-500 to-violet-600"}`}>
+                      {isUser ? <User className="h-3.5 w-3.5 text-white" /> : <Bot className="h-3.5 w-3.5 text-white" />}
                     </div>
-                    <div className={`rounded-2xl px-3 py-2 text-xs leading-relaxed max-w-[85%] ${isUser ? "bg-violet-600 text-white rounded-br-sm" : "bg-slate-100 text-slate-800 rounded-bl-sm"}`}>
+                    <div className={`rounded-2xl px-4 py-2.5 text-sm leading-relaxed max-w-[80%] ${isUser ? "bg-violet-600 text-white rounded-br-sm" : "bg-white border border-slate-200 text-slate-800 rounded-bl-sm shadow-sm"}`}>
                       <MarkdownLite text={text} />
                     </div>
                   </div>
                 );
               })}
               {status === "submitted" && (
-                <div className="flex gap-2">
-                  <div className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-violet-100">
-                    <Bot className="h-3 w-3 text-violet-700" />
+                <div className="flex gap-3">
+                  <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-600">
+                    <Bot className="h-3.5 w-3.5 text-white" />
                   </div>
-                  <div className="rounded-2xl px-3 py-2 bg-slate-100 text-slate-500 text-xs">
-                    <Loader2 className="h-3 w-3 animate-spin inline" />
+                  <div className="rounded-2xl px-4 py-2.5 bg-white border border-slate-200 text-slate-500 text-sm">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin inline" /> Thinking…
                   </div>
                 </div>
               )}
             </div>
 
-            <div className="border-t border-slate-200 p-2.5">
-              <div className="flex items-center gap-1.5">
-                <Input
+            <div className="border-t border-slate-200 p-3 bg-white">
+              <div className="flex items-end gap-2">
+                <Textarea
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendChat(); } }}
-                  placeholder="Ask SyncBot…"
-                  className="text-xs h-9"
+                  placeholder="Message SyncBot…"
+                  className="min-h-[44px] max-h-32 text-sm resize-none"
                   disabled={chatBusy}
                   autoFocus
                 />
-                <Button size="icon" onClick={handleSendChat} disabled={chatBusy || !chatInput.trim()} className="h-9 w-9 shrink-0 bg-violet-600 hover:bg-violet-700">
-                  <Send className="h-3.5 w-3.5" />
+                <Button size="icon" onClick={handleSendChat} disabled={chatBusy || !chatInput.trim()} className="h-11 w-11 shrink-0 bg-violet-600 hover:bg-violet-700">
+                  <Send className="h-4 w-4" />
                 </Button>
               </div>
             </div>
           </Card>
 
-          <Card className="p-4 border-slate-200/80 shadow-sm">
-            <div className="flex items-center gap-2 mb-3">
-              <Workflow className="h-4 w-4 text-indigo-600" />
-              <h2 className="font-semibold text-sm">Workflow Post-Draft</h2>
-            </div>
-            <p className="text-[11px] text-slate-500 mb-3">Pick the automations to run after approval.</p>
-
-            <div className="space-y-2 mb-4">
-              <WorkflowItem icon={<CreditCard className="h-3.5 w-3.5 text-emerald-600" />} label="Generate Invoice via Stripe" checked={workflows.invoice} onChange={(v) => setWorkflows({ ...workflows, invoice: v })} />
-              <WorkflowItem icon={<Share2 className="h-3.5 w-3.5 text-sky-600" />} label="Draft 3 Social Media Posts" checked={workflows.social} onChange={(v) => setWorkflows({ ...workflows, social: v })} />
-              <WorkflowItem icon={<Mail className="h-3.5 w-3.5 text-rose-600" />} label="Send to Client via Gmail" checked={workflows.email} onChange={(v) => setWorkflows({ ...workflows, email: v })} />
-            </div>
-
-            <Button onClick={handleAutomate} disabled={automating} className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white shadow-md shadow-violet-500/20">
-              {automating ? (
-                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Automating…</>
-              ) : automated ? (
-                <><CheckCircle2 className="mr-2 h-4 w-4" /> Workflow Complete</>
-              ) : (
-                <><Zap className="mr-2 h-4 w-4" /> Approve & Automate</>
-              )}
-            </Button>
-
-            {automated && (
-              <div className="mt-3 rounded-md bg-emerald-50 border border-emerald-200 p-2.5 text-[11px] text-emerald-800 animate-in fade-in slide-in-from-bottom-1">
-                ✓ {[workflows.invoice && "Invoice sent", workflows.social && "Posts drafted", workflows.email && "Email queued"].filter(Boolean).join(" · ")}
+          {/* Side tools: brief + draft */}
+          <div className="lg:col-span-4 space-y-4">
+            <Card className="p-5 border-slate-200/80 shadow-sm">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Brain className="h-4 w-4 text-violet-600" />
+                  <h2 className="font-semibold text-sm">Brief Insights</h2>
+                </div>
               </div>
-            )}
-          </Card>
+              <div className="relative rounded-lg border-2 border-dashed border-slate-200 bg-slate-50/50 p-3 mb-3">
+                <div className="flex items-center gap-2 text-xs text-slate-500 mb-2">
+                  <Upload className="h-3.5 w-3.5" />
+                  <span>Paste a client brief or email</span>
+                </div>
+                <Textarea
+                  value={briefText}
+                  onChange={(e) => setBriefText(e.target.value)}
+                  placeholder="Paste a messy client email…"
+                  className="min-h-[100px] resize-none border-0 bg-white/80 text-xs"
+                />
+              </div>
+              <Button onClick={handleExtract} disabled={extracting || !briefText.trim()} className="w-full bg-violet-600 hover:bg-violet-700 text-white">
+                {extracting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Extracting…</> : <><Wand2 className="mr-2 h-4 w-4" /> Extract Insights</>}
+              </Button>
+              <div className="mt-3 flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
+                <Label htmlFor="autosync" className="text-xs font-medium text-slate-700 cursor-pointer">Auto-sync to CRM</Label>
+                <Switch id="autosync" checked={autoSync} onCheckedChange={setAutoSync} />
+              </div>
+
+              {(extracting || insights) && (
+                <div className="mt-4 pt-4 border-t border-slate-100">
+                  <div className="flex items-center gap-2 mb-2">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                    <h3 className="text-xs font-semibold text-slate-700">Structured Insights</h3>
+                  </div>
+                  {extracting ? (
+                    <div className="space-y-2">{[...Array(4)].map((_, i) => <Skeleton key={i} className="h-7 w-full" />)}</div>
+                  ) : insights && (
+                    <div className="space-y-1.5">
+                      <InsightRow k="Client" v={insights.client_name} />
+                      <InsightRow k="Contact" v={insights.contact} />
+                      <InsightRow k="Budget" v={insights.budget} />
+                      <InsightRow k="Deadline" v={insights.deadline} />
+                      <InsightRow k="Tone" v={insights.tone} />
+                      <InsightRow k="Deliverables" v={insights.deliverables?.join(", ") ?? null} />
+                    </div>
+                  )}
+                </div>
+              )}
+            </Card>
+
+            <Card className="p-5 border-slate-200/80 shadow-sm">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-indigo-600" />
+                  <h2 className="font-semibold text-sm">Auto-Drafter</h2>
+                </div>
+                <Button size="sm" onClick={handleGenerate} disabled={generating || !briefText.trim()} className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white">
+                  {generating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+                </Button>
+              </div>
+              <div className="flex items-center gap-1 mb-2">
+                <Button size="sm" variant="ghost" className="h-7 text-[11px] px-2" onClick={() => handleAiAction("shorter")} disabled={generating || !draft}><Minimize2 className="h-3 w-3 mr-1" /> Shorter</Button>
+                <Button size="sm" variant="ghost" className="h-7 text-[11px] px-2" onClick={() => handleAiAction("warmer")} disabled={generating || !draft}><RefreshCw className="h-3 w-3 mr-1" /> Tone</Button>
+                <Button size="sm" variant="ghost" className="h-7 text-[11px] px-2" onClick={() => handleAiAction("expand")} disabled={generating || !draft}><Maximize2 className="h-3 w-3 mr-1" /> Expand</Button>
+              </div>
+              <div className="rounded-lg bg-slate-50 border border-slate-200 p-3 min-h-[160px] max-h-[280px] overflow-y-auto">
+                {!draft && !generating && (
+                  <p className="text-xs text-slate-400 text-center mt-12">Generate a draft from your brief.</p>
+                )}
+                {(draft || generating) && (
+                  <pre className="whitespace-pre-wrap font-sans text-[12px] leading-relaxed text-slate-800 m-0">{draft}{generating && <span className="inline-block w-1.5 h-3.5 bg-violet-600 ml-0.5 animate-pulse align-middle" />}</pre>
+                )}
+              </div>
+            </Card>
+          </div>
         </section>
       </main>
     </div>
