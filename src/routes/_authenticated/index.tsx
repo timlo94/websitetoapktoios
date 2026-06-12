@@ -72,10 +72,14 @@ function Workspace() {
   }, []);
 
   // Chat
-  const transport = token ? new DefaultChatTransport({
-    api: "/api/chat",
-    headers: { Authorization: `Bearer ${token}` },
-  }) : undefined;
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: "/api/chat",
+        headers: () => (token ? { Authorization: `Bearer ${token}` } : {}),
+      }),
+    [token],
+  );
 
   const { messages, sendMessage, status } = useChat({
     transport,
