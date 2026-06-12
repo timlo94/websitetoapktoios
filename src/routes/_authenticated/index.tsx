@@ -304,9 +304,13 @@ function Workspace() {
                     <Button onClick={handleGenerateImage} disabled={imgLoading} size="sm" className="w-full bg-violet-600 hover:bg-violet-700 text-white">
                       {imgLoading ? <><Loader2 className="mr-2 h-3 w-3 animate-spin" /> Generating…</> : <><Sparkles className="mr-2 h-3 w-3" /> Generate Asset</>}
                     </Button>
-                    {imgLoading && <Skeleton className="h-32 w-full rounded-md" />}
-                    {imgUrl && !imgLoading && (
-                      <img src={imgUrl} alt="generated" className="h-32 w-full rounded-md object-cover" />
+                    {imgLoading && !imgUrl && <Skeleton className="h-32 w-full rounded-md" />}
+                    {imgUrl && (
+                      <img
+                        src={imgUrl}
+                        alt="generated"
+                        className={`h-32 w-full rounded-md object-cover transition-[filter] ${imgFinal ? "blur-0" : "blur-md"}`}
+                      />
                     )}
                   </div>
                 </PopoverContent>
