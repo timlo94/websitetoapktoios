@@ -164,10 +164,11 @@ function Workspace() {
 
   const handleSendChat = useCallback(() => {
     const text = chatInput.trim();
-    if (!text || !transport) return;
+    if (!text) return;
+    if (!token) { toast.error("Signing you in… try again in a moment"); return; }
     setChatInput("");
     sendMessage({ text });
-  }, [chatInput, sendMessage, transport]);
+  }, [chatInput, sendMessage, token]);
 
   const handleAutomate = () => {
     setAutomating(true);
