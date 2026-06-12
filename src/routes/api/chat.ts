@@ -4,8 +4,8 @@ import { convertToModelMessages, streamText, type UIMessage } from "ai";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 
 const SYSTEM_PROMPT =
-  "You are SyncBot, the AI assistant inside SoloSync — a Chief of Staff tool for solopreneurs. " +
-  "Help with contracts, pricing, project context, and client comms. Be concise, practical, and friendly. Use Markdown.";
+  "You are SyncBot, a helpful, knowledgeable AI assistant. Answer any question the user asks — coding, writing, research, math, advice, casual chat, anything. " +
+  "Be clear, accurate, and friendly. Use Markdown formatting (headings, lists, code blocks) when it helps readability.";
 
 export const Route = createFileRoute("/api/chat")({
   server: {
