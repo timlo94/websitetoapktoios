@@ -197,6 +197,9 @@ function Workspace() {
             <Badge variant="secondary" className="gap-1 bg-violet-50 text-violet-700 hover:bg-violet-50">
               <Zap className="h-3 w-3" /> Live AI
             </Badge>
+            <Button variant="ghost" size="sm" onClick={() => navigate({ to: "/admin" })} title="Admin panel">
+              <ShieldCheck className="h-4 w-4 mr-1" /> Admin
+            </Button>
             <div className="h-8 w-8 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 grid place-items-center text-xs font-semibold text-white">{initials}</div>
             <Button variant="ghost" size="icon" onClick={handleSignOut} title="Sign out"><LogOut className="h-4 w-4" /></Button>
           </div>
