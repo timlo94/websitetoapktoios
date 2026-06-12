@@ -227,35 +227,118 @@ function Workspace() {
                     <><Wand2 className="mr-2 h-4 w-4" /> Generate Image</>
                   )}
                 </Button>
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) handleUploadImage(f);
+                    e.target.value = "";
+                  }}
+                />
+                <Button
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full border-dashed"
+                >
+                  <Upload className="mr-2 h-4 w-4" /> Upload Your Own Image
+                </Button>
+
+                {imgUrl && (
+                  <div className="rounded-lg border border-slate-200 bg-white/70 p-3 space-y-2">
+                    <Label className="text-xs font-semibold text-slate-700 flex items-center gap-1">
+                      <RefreshCw className="h-3 w-3" /> Refine / Retune
+                    </Label>
+                    <Textarea
+                      value={refinePrompt}
+                      onChange={(e) => setRefinePrompt(e.target.value)}
+                      placeholder="e.g. make the lighting warmer, add a sunset sky, remove the background"
+                      className="min-h-[70px] resize-none text-sm bg-white"
+                    />
+                    <Button
+                      onClick={handleRefineImage}
+                      disabled={refining || !refinePrompt.trim()}
+                      size="sm"
+                      className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
+                    >
+                      {refining ? (
+                        <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Refining…</>
+                      ) : (
+                        <><Wand2 className="mr-2 h-4 w-4" /> Apply Refinement</>
+                      )}
+                    </Button>
+                  </div>
+                )}
               </div>
 
-              <div className="relative aspect-square rounded-xl bg-slate-100 border border-slate-200 overflow-hidden grid place-items-center">
-                {!imgUrl && !imgLoading && (
-                  <div className="text-center text-slate-400 px-6">
-                    <ImageIcon className="h-10 w-10 mx-auto mb-2 opacity-50" />
-                    <p className="text-xs">Your generated image will appear here</p>
-                  </div>
-                )}
-                {imgLoading && !imgUrl && (
-                  <div className="absolute inset-0 grid place-items-center bg-slate-100">
-                    <Loader2 className="h-8 w-8 text-violet-600 animate-spin" />
-                  </div>
-                )}
-                {imgUrl && (
-                  <img
-                    src={imgUrl}
-                    alt={imgPrompt}
-                    className={`h-full w-full object-cover transition-[filter] duration-300 ${imgFinal ? "blur-0" : "blur-xl"}`}
-                  />
-                )}
+              <div className="space-y-3">
+                <div className="relative aspect-square rounded-xl bg-slate-100 border border-slate-200 overflow-hidden grid place-items-center">
+                  {!imgUrl && !(imgLoading || refining) && (
+                    <div className="text-center text-slate-400 px-6">
+                      <ImageIcon className="h-10 w-10 mx-auto mb-2 opacity-50" />
+                      <p className="text-xs">Generate, upload, or animate an image</p>
+                    </div>
+                  )}
+                  {(imgLoading || refining) && !imgUrl && (
+                    <div className="absolute inset-0 grid place-items-center bg-slate-100">
+                      <Loader2 className="h-8 w-8 text-violet-600 animate-spin" />
+                    </div>
+                  )}
+                  {imgUrl && (
+                    <img
+                      src={imgUrl}
+                      alt={imgPrompt}
+                      className={`h-full w-full object-cover transition-[filter] duration-300 ${imgFinal ? "blur-0" : "blur-xl"} ${animPlaying ? `anim-${animStyle}` : ""}`}
+                    />
+                  )}
+                  {imgUrl && imgFinal && !animPlaying && (
+                    <a
+                      href={imgUrl}
+                      download="image.png"
+                      className="absolute bottom-3 right-3 text-[11px] bg-white/95 hover:bg-white px-3 py-1.5 rounded-full shadow-md font-medium text-slate-700"
+                    >
+                      Download
+                    </a>
+                  )}
+                  {animPlaying && (
+                    <div className="absolute top-3 left-3 text-[10px] bg-black/70 text-white px-2 py-1 rounded-full font-medium flex items-center gap-1">
+                      <Film className="h-3 w-3" /> {animStyle}
+                    </div>
+                  )}
+                </div>
+
                 {imgUrl && imgFinal && (
-                  <a
-                    href={imgUrl}
-                    download="generated.png"
-                    className="absolute bottom-3 right-3 text-[11px] bg-white/95 hover:bg-white px-3 py-1.5 rounded-full shadow-md font-medium text-slate-700"
-                  >
-                    Download
-                  </a>
+                  <div className="rounded-lg border border-slate-200 bg-white/70 p-3 space-y-2">
+                    <Label className="text-xs font-semibold text-slate-700 flex items-center gap-1">
+                      <Film className="h-3 w-3" /> Animate to Video
+                    </Label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {(["kenburns", "panLeft", "panRight", "zoomIn", "float"] as const).map((s) => (
+                        <button
+                          key={s}
+                          onClick={() => setAnimStyle(s)}
+                          className={`text-[11px] px-2.5 py-1 rounded-full border transition ${
+                            animStyle === s
+                              ? "bg-violet-600 border-violet-600 text-white"
+                              : "bg-white border-slate-200 text-slate-600 hover:border-violet-300"
+                          }`}
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                    <Button
+                      onClick={() => setAnimPlaying((v) => !v)}
+                      size="sm"
+                      className={`w-full ${animPlaying ? "bg-slate-700 hover:bg-slate-800 text-white" : "bg-gradient-to-r from-fuchsia-600 to-violet-600 hover:from-fuchsia-700 hover:to-violet-700 text-white"}`}
+                    >
+                      <Film className="mr-2 h-4 w-4" />
+                      {animPlaying ? "Stop Animation" : "Play Animation"}
+                    </Button>
+                  </div>
                 )}
               </div>
             </div>
