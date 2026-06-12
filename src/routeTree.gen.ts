@@ -16,6 +16,7 @@ import { Route as ApiGenerateImageRouteImport } from './routes/api/generate-imag
 import { Route as ApiEditImageRouteImport } from './routes/api/edit-image'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as ApiPublicGenerateImageRouteImport } from './routes/api/public/generate-image'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -51,6 +52,11 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicGenerateImageRoute = ApiPublicGenerateImageRouteImport.update({
+  id: '/api/public/generate-image',
+  path: '/api/public/generate-image',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/api/chat': typeof ApiChatRoute
   '/api/edit-image': typeof ApiEditImageRoute
   '/api/generate-image': typeof ApiGenerateImageRoute
+  '/api/public/generate-image': typeof ApiPublicGenerateImageRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
@@ -67,6 +74,7 @@ export interface FileRoutesByTo {
   '/api/edit-image': typeof ApiEditImageRoute
   '/api/generate-image': typeof ApiGenerateImageRoute
   '/': typeof AuthenticatedIndexRoute
+  '/api/public/generate-image': typeof ApiPublicGenerateImageRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -77,6 +85,7 @@ export interface FileRoutesById {
   '/api/edit-image': typeof ApiEditImageRoute
   '/api/generate-image': typeof ApiGenerateImageRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/api/public/generate-image': typeof ApiPublicGenerateImageRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -87,6 +96,7 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/api/edit-image'
     | '/api/generate-image'
+    | '/api/public/generate-image'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
@@ -95,6 +105,7 @@ export interface FileRouteTypes {
     | '/api/edit-image'
     | '/api/generate-image'
     | '/'
+    | '/api/public/generate-image'
   id:
     | '__root__'
     | '/_authenticated'
@@ -104,6 +115,7 @@ export interface FileRouteTypes {
     | '/api/edit-image'
     | '/api/generate-image'
     | '/_authenticated/'
+    | '/api/public/generate-image'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -112,6 +124,7 @@ export interface RootRouteChildren {
   ApiChatRoute: typeof ApiChatRoute
   ApiEditImageRoute: typeof ApiEditImageRoute
   ApiGenerateImageRoute: typeof ApiGenerateImageRoute
+  ApiPublicGenerateImageRoute: typeof ApiPublicGenerateImageRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -165,6 +178,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/generate-image': {
+      id: '/api/public/generate-image'
+      path: '/api/public/generate-image'
+      fullPath: '/api/public/generate-image'
+      preLoaderRoute: typeof ApiPublicGenerateImageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -187,7 +207,18 @@ const rootRouteChildren: RootRouteChildren = {
   ApiChatRoute: ApiChatRoute,
   ApiEditImageRoute: ApiEditImageRoute,
   ApiGenerateImageRoute: ApiGenerateImageRoute,
+  ApiPublicGenerateImageRoute: ApiPublicGenerateImageRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
