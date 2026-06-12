@@ -90,7 +90,10 @@ export const extractInsights = createServerFn({ method: "POST" })
         extracted_json: parsed,
         title: parsed.client_name ?? "Untitled brief",
       }).select("id").single();
-      if (error) throw new Error(error.message);
+      if (error) {
+        console.error("[DB] brief insert failed:", error);
+        throw new Error("Failed to save brief. Please try again.");
+      }
       briefId = row.id;
     }
     return { insights: parsed, briefId };
@@ -101,8 +104,8 @@ export const generateDraft = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({
     briefId: z.string().uuid().optional(),
     insights: InsightsSchema.optional(),
-    rawText: z.string().optional(),
-    prompt: z.string().optional(),
+    rawText: z.string().max(20000).optional(),
+    prompt: z.string().max(2000).optional(),
   }).parse(input))
   .handler(async ({ data, context }) => {
     const sys = "You are a senior client services writer. Produce a polished, warm, professional proposal in Markdown. Use headings (##) for sections like Scope, Timeline, Investment. Keep it concise (~250 words).";
@@ -123,14 +126,17 @@ export const generateDraft = createServerFn({ method: "POST" })
       brief_id: data.briefId ?? null,
       content,
     }).select("id").single();
-    if (error) throw new Error(error.message);
+    if (error) {
+      console.error("[DB] draft insert failed:", error);
+      throw new Error("Failed to save draft. Please try again.");
+    }
     return { content, draftId: row.id };
   });
 
 export const transformDraft = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({
-    content: z.string().min(1),
+    content: z.string().min(1).max(50000),
     action: z.enum(["shorter", "expand", "warmer", "formal"]),
   }).parse(input))
   .handler(async ({ data }) => {

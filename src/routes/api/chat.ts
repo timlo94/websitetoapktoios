@@ -26,6 +26,16 @@ export const Route = createFileRoute("/api/chat")({
 
         const { messages } = (await request.json()) as { messages: UIMessage[] };
         if (!Array.isArray(messages)) return new Response("Bad request", { status: 400 });
+        if (messages.length > 100) return new Response("Too many messages", { status: 413 });
+
+        const MAX_MSG_CHARS = 10000;
+        for (const m of messages) {
+          const total = (m.parts ?? []).reduce(
+            (n, p) => n + (p.type === "text" ? (p.text?.length ?? 0) : 0),
+            0,
+          );
+          if (total > MAX_MSG_CHARS) return new Response("Message too large", { status: 413 });
+        }
 
         // Persist the latest user message
         const last = messages[messages.length - 1];
