@@ -57,9 +57,16 @@ function Workspace() {
     () =>
       new DefaultChatTransport({
         api: "/api/chat",
-        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        fetch: async (input, init) => {
+          const { data } = await supabase.auth.getSession();
+          const fresh = data.session?.access_token;
+          if (!fresh) throw new Error("Your session expired. Please sign in again.");
+          const headers = new Headers(init?.headers);
+          headers.set("Authorization", `Bearer ${fresh}`);
+          return fetch(input, { ...init, headers });
+        },
       }),
-    [token],
+    [],
   );
 
   const { messages, sendMessage, status, error, stop, regenerate } = useChat({
