@@ -140,13 +140,24 @@ function Workspace() {
     }
   };
 
-  const handleGenerateImage = () => {
+  const [imgFinal, setImgFinal] = useState(false);
+  const handleGenerateImage = async () => {
+    if (!token) { toast.error("Not signed in"); return; }
+    if (!imgPrompt.trim()) return;
     setImgLoading(true);
     setImgUrl(null);
-    setTimeout(() => {
-      setImgUrl(`https://source.unsplash.com/600x400/?${encodeURIComponent(imgPrompt)}&sig=${Date.now()}`);
+    setImgFinal(false);
+    try {
+      const { streamImage } = await import("@/lib/streamImage");
+      await streamImage("/api/generate-image", imgPrompt, token, (dataUrl, isFinal) => {
+        setImgUrl(dataUrl);
+        if (isFinal) setImgFinal(true);
+      });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Image generation failed");
+    } finally {
       setImgLoading(false);
-    }, 900);
+    }
   };
 
   const handleSendChat = useCallback(() => {
@@ -293,9 +304,13 @@ function Workspace() {
                     <Button onClick={handleGenerateImage} disabled={imgLoading} size="sm" className="w-full bg-violet-600 hover:bg-violet-700 text-white">
                       {imgLoading ? <><Loader2 className="mr-2 h-3 w-3 animate-spin" /> Generating…</> : <><Sparkles className="mr-2 h-3 w-3" /> Generate Asset</>}
                     </Button>
-                    {imgLoading && <Skeleton className="h-32 w-full rounded-md" />}
-                    {imgUrl && !imgLoading && (
-                      <img src={imgUrl} alt="generated" className="h-32 w-full rounded-md object-cover" />
+                    {imgLoading && !imgUrl && <Skeleton className="h-32 w-full rounded-md" />}
+                    {imgUrl && (
+                      <img
+                        src={imgUrl}
+                        alt="generated"
+                        className={`h-32 w-full rounded-md object-cover transition-[filter] ${imgFinal ? "blur-0" : "blur-md"}`}
+                      />
                     )}
                   </div>
                 </PopoverContent>
