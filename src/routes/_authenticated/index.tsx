@@ -62,9 +62,9 @@ function Workspace() {
     [token],
   );
 
-  const { messages, sendMessage, status } = useChat({
+  const { messages, sendMessage, status, error, stop, regenerate } = useChat({
     transport,
-    onError: (e) => toast.error(e.message),
+    onError: (e) => toast.error(e.message || "SyncBot error"),
   });
   const [chatInput, setChatInput] = useState("");
   const chatBusy = status === "submitted" || status === "streaming";
