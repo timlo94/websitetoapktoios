@@ -9,14 +9,12 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Sparkles, Upload, FileText, Zap, Send, Image as ImageIcon,
   Wand2, Minimize2, Maximize2, Bot, User,
-  CheckCircle2, Loader2, Mail,
+  CheckCircle2, Loader2,
   Brain, RefreshCw, LogOut, ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
