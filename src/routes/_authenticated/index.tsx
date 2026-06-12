@@ -140,13 +140,24 @@ function Workspace() {
     }
   };
 
-  const handleGenerateImage = () => {
+  const [imgFinal, setImgFinal] = useState(false);
+  const handleGenerateImage = async () => {
+    if (!token) { toast.error("Not signed in"); return; }
+    if (!imgPrompt.trim()) return;
     setImgLoading(true);
     setImgUrl(null);
-    setTimeout(() => {
-      setImgUrl(`https://source.unsplash.com/600x400/?${encodeURIComponent(imgPrompt)}&sig=${Date.now()}`);
+    setImgFinal(false);
+    try {
+      const { streamImage } = await import("@/lib/streamImage");
+      await streamImage("/api/generate-image", imgPrompt, token, (dataUrl, isFinal) => {
+        setImgUrl(dataUrl);
+        if (isFinal) setImgFinal(true);
+      });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Image generation failed");
+    } finally {
       setImgLoading(false);
-    }, 900);
+    }
   };
 
   const handleSendChat = useCallback(() => {
