@@ -136,7 +136,7 @@ export const generateDraft = createServerFn({ method: "POST" })
 export const transformDraft = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({
-    content: z.string().min(1),
+    content: z.string().min(1).max(50000),
     action: z.enum(["shorter", "expand", "warmer", "formal"]),
   }).parse(input))
   .handler(async ({ data }) => {
