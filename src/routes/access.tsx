@@ -452,11 +452,11 @@ function GuestStudio({ pin, onLock }: { pin: string; onLock: () => void }) {
           <div className="px-6 py-5 border-b border-slate-200/70 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 shadow-md shadow-violet-500/30">
-                <ImageIcon className="h-5 w-5 text-white" />
+                <Upload className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h2 className="text-lg font-bold tracking-tight">AI Image Studio</h2>
-                <p className="text-xs text-slate-500">Generate, upload, refine, and animate images — no account needed.</p>
+                <h2 className="text-lg font-bold tracking-tight">Photo Studio</h2>
+                <p className="text-xs text-slate-500">Upload your photo to cartoonize, refine, and animate it — no account needed.</p>
               </div>
             </div>
             <Badge variant="secondary" className="gap-1 bg-violet-100 text-violet-700">
@@ -465,44 +465,8 @@ function GuestStudio({ pin, onLock }: { pin: string; onLock: () => void }) {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
-            <div className="space-y-3">
-              <Label htmlFor="g-prompt" className="text-sm font-semibold">Prompt</Label>
-              <Textarea
-                id="g-prompt"
-                value={imgPrompt}
-                onChange={(e) => setImgPrompt(e.target.value)}
-                placeholder="Describe the image you want"
-                className="min-h-[140px] resize-none text-sm bg-white"
-              />
-              <div className="flex flex-wrap gap-1.5">
-                {[
-                  "minimalist logo for a coffee brand",
-                  "isometric 3d city, pastel colors",
-                  "portrait of a cyberpunk samurai",
-                  "watercolor mountain landscape",
-                ].map((p) => (
-                  <button
-                    key={p}
-                    onClick={() => setImgPrompt(p)}
-                    className="text-[11px] px-2 py-1 rounded-full bg-white border border-slate-200 text-slate-600 hover:border-violet-300 hover:text-violet-700 transition"
-                  >
-                    {p}
-                  </button>
-                ))}
-              </div>
-              <Button
-                onClick={handleGenerate}
-                disabled={imgLoading || !imgPrompt.trim()}
-                size="lg"
-                className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white shadow-md shadow-violet-500/30"
-              >
-                {imgLoading ? (
-                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating…</>
-                ) : (
-                  <><Wand2 className="mr-2 h-4 w-4" /> Generate Image</>
-                )}
-              </Button>
-
+            <div className="space-y-4">
+              {/* PRIMARY: Upload */}
               <input
                 ref={fileInputRef}
                 type="file"
@@ -514,12 +478,30 @@ function GuestStudio({ pin, onLock }: { pin: string; onLock: () => void }) {
                   e.target.value = "";
                 }}
               />
-              <Button
+              <div
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full bg-red-600 hover:bg-red-700 text-white border border-red-700"
+                onDragOver={(e) => { e.preventDefault(); }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const f = e.dataTransfer.files?.[0];
+                  if (f) handleUpload(f);
+                }}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileInputRef.current?.click(); } }}
+                className="group cursor-pointer rounded-2xl border-2 border-dashed border-violet-300 bg-gradient-to-br from-violet-50 via-white to-indigo-50 hover:border-violet-500 hover:from-violet-100 transition p-8 text-center"
               >
-                <Upload className="mr-2 h-4 w-4" /> Upload Your Own Image
-              </Button>
+                <div className="mx-auto mb-3 grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-600 shadow-lg shadow-violet-500/40 group-hover:scale-105 transition-transform">
+                  <Upload className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-base font-bold text-slate-900">Upload your photo</h3>
+                <p className="text-xs text-slate-500 mt-1">Drag &amp; drop, or click to browse · PNG / JPG · up to 6MB</p>
+                <div className="mt-4">
+                  <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-violet-600 text-white text-sm font-semibold shadow-md shadow-violet-500/30 group-hover:bg-violet-700 transition">
+                    <Upload className="h-4 w-4" /> Choose photo
+                  </span>
+                </div>
+              </div>
 
               {imgUrl && (
                 <div className="rounded-lg border border-slate-200 bg-white/70 p-3 space-y-2">
@@ -547,6 +529,58 @@ function GuestStudio({ pin, onLock }: { pin: string; onLock: () => void }) {
                   </Button>
                 </div>
               )}
+
+              {/* SECONDARY: text-to-image — collapsed, low-emphasis */}
+              <details className="group rounded-lg border border-slate-200 bg-white/60 open:bg-white/80 transition">
+                <summary className="cursor-pointer list-none px-3 py-2.5 flex items-center justify-between text-xs text-slate-600 hover:text-slate-900">
+                  <span className="inline-flex items-center gap-1.5">
+                    <Wand2 className="h-3.5 w-3.5 text-slate-400" />
+                    <span className="font-medium">No photo? Generate one from text</span>
+                    <span className="text-[10px] text-slate-400">· optional</span>
+                  </span>
+                  <span className="text-[10px] text-slate-400 group-open:hidden">Show</span>
+                  <span className="text-[10px] text-slate-400 hidden group-open:inline">Hide</span>
+                </summary>
+                <div className="px-3 pb-3 pt-1 space-y-2">
+                  <Label htmlFor="g-prompt" className="text-[11px] font-semibold text-slate-600">Prompt</Label>
+                  <Textarea
+                    id="g-prompt"
+                    value={imgPrompt}
+                    onChange={(e) => setImgPrompt(e.target.value)}
+                    placeholder="Describe the image you want"
+                    className="min-h-[80px] resize-none text-sm bg-white"
+                  />
+                  <div className="flex flex-wrap gap-1.5">
+                    {[
+                      "minimalist logo for a coffee brand",
+                      "isometric 3d city, pastel colors",
+                      "portrait of a cyberpunk samurai",
+                      "watercolor mountain landscape",
+                    ].map((p) => (
+                      <button
+                        key={p}
+                        onClick={() => setImgPrompt(p)}
+                        className="text-[10px] px-2 py-0.5 rounded-full bg-white border border-slate-200 text-slate-500 hover:border-violet-300 hover:text-violet-700 transition"
+                      >
+                        {p}
+                      </button>
+                    ))}
+                  </div>
+                  <Button
+                    onClick={handleGenerate}
+                    disabled={imgLoading || !imgPrompt.trim()}
+                    size="sm"
+                    variant="outline"
+                    className="w-full"
+                  >
+                    {imgLoading ? (
+                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating…</>
+                    ) : (
+                      <><Wand2 className="mr-2 h-4 w-4" /> Generate from text</>
+                    )}
+                  </Button>
+                </div>
+              </details>
             </div>
 
             <div className="space-y-3">
