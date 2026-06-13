@@ -159,6 +159,50 @@ function GuestStudio({ pin, onLock }: { pin: string; onLock: () => void }) {
 
   const [animStyle, setAnimStyle] = useState<"kenburns" | "panLeft" | "panRight" | "zoomIn" | "float">("kenburns");
   const [animPlaying, setAnimPlaying] = useState(false);
+  const [videoTheme, setVideoTheme] = useState<"none" | "vintage" | "noir" | "vibrant" | "dreamy" | "neon">("none");
+  const [videoMusic, setVideoMusic] = useState<"none" | "chill" | "cinematic" | "upbeat" | "ambient" | "dramatic">("chill");
+  const [videoDuration, setVideoDuration] = useState<5 | 8 | 12>(8);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [videoBusy, setVideoBusy] = useState(false);
+  const [videoProgress, setVideoProgress] = useState(0);
+
+  useEffect(() => {
+    return () => { if (videoUrl) URL.revokeObjectURL(videoUrl); };
+  }, [videoUrl]);
+
+  // Invalidate any prior generated video whenever the source image changes
+  useEffect(() => {
+    setVideoUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return null;
+    });
+  }, [imgUrl]);
+
+  const handleGenerateVideo = async () => {
+    if (!imgUrl) { toast.error("Upload or generate an image first"); return; }
+    setVideoBusy(true);
+    setVideoProgress(0);
+    if (videoUrl) { URL.revokeObjectURL(videoUrl); setVideoUrl(null); }
+    try {
+      const { exportAnimatedVideo } = await import("@/lib/videoExport");
+      const blob = await exportAnimatedVideo({
+        imageUrl: imgUrl,
+        motion: animStyle,
+        theme: videoTheme,
+        music: videoMusic,
+        durationSec: videoDuration,
+        onProgress: (p) => setVideoProgress(p),
+      });
+      const url = URL.createObjectURL(blob);
+      setVideoUrl(url);
+      toast.success("Video ready — preview and download below");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Video export failed");
+    } finally {
+      setVideoBusy(false);
+      setVideoProgress(0);
+    }
+  };
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const chatScrollRef = useRef<HTMLDivElement>(null);
@@ -650,33 +694,160 @@ function GuestStudio({ pin, onLock }: { pin: string; onLock: () => void }) {
 
 
               {imgUrl && imgFinal && (
-                <div className="rounded-lg border border-slate-200 bg-white/70 p-3 space-y-2">
-                  <Label className="text-xs font-semibold text-slate-700 flex items-center gap-1">
-                    <Film className="h-3 w-3" /> Animate to Video
-                  </Label>
-                  <div className="flex flex-wrap gap-1.5">
-                    {(["kenburns", "panLeft", "panRight", "zoomIn", "float"] as const).map((s) => (
-                      <button
-                        key={s}
-                        onClick={() => setAnimStyle(s)}
-                        className={`text-[11px] px-2.5 py-1 rounded-full border transition ${
-                          animStyle === s
-                            ? "bg-violet-600 border-violet-600 text-white"
-                            : "bg-white border-slate-200 text-slate-600 hover:border-violet-300"
-                        }`}
-                      >
-                        {s}
-                      </button>
-                    ))}
+                <div className="rounded-xl border border-slate-200 bg-gradient-to-br from-white via-fuchsia-50/30 to-violet-50/30 p-3 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs font-semibold text-slate-700 flex items-center gap-1">
+                      <Film className="h-3.5 w-3.5 text-fuchsia-600" /> Animate to Video
+                    </Label>
+                    <span className="text-[10px] text-slate-400">.webm with audio</span>
                   </div>
+
+                  {/* Motion */}
+                  <div className="space-y-1">
+                    <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Motion</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {(["kenburns", "panLeft", "panRight", "zoomIn", "float"] as const).map((s) => (
+                        <button
+                          key={s}
+                          onClick={() => setAnimStyle(s)}
+                          className={`text-[11px] px-2.5 py-1 rounded-full border transition ${
+                            animStyle === s
+                              ? "bg-violet-600 border-violet-600 text-white"
+                              : "bg-white border-slate-200 text-slate-600 hover:border-violet-300"
+                          }`}
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Theme */}
+                  <div className="space-y-1">
+                    <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Theme</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {([
+                        { v: "none", label: "Original" },
+                        { v: "vintage", label: "Vintage" },
+                        { v: "noir", label: "Noir" },
+                        { v: "vibrant", label: "Vibrant" },
+                        { v: "dreamy", label: "Dreamy" },
+                        { v: "neon", label: "Neon" },
+                      ] as const).map((t) => (
+                        <button
+                          key={t.v}
+                          onClick={() => setVideoTheme(t.v)}
+                          className={`text-[11px] px-2.5 py-1 rounded-full border transition ${
+                            videoTheme === t.v
+                              ? "bg-fuchsia-600 border-fuchsia-600 text-white"
+                              : "bg-white border-slate-200 text-slate-600 hover:border-fuchsia-300"
+                          }`}
+                        >
+                          {t.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Music */}
+                  <div className="space-y-1">
+                    <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Background Music</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {([
+                        { v: "none", label: "🔇 None" },
+                        { v: "chill", label: "🌊 Chill" },
+                        { v: "cinematic", label: "🎬 Cinematic" },
+                        { v: "upbeat", label: "🎉 Upbeat" },
+                        { v: "ambient", label: "✨ Ambient" },
+                        { v: "dramatic", label: "🥁 Dramatic" },
+                      ] as const).map((t) => (
+                        <button
+                          key={t.v}
+                          onClick={() => setVideoMusic(t.v)}
+                          className={`text-[11px] px-2.5 py-1 rounded-full border transition ${
+                            videoMusic === t.v
+                              ? "bg-indigo-600 border-indigo-600 text-white"
+                              : "bg-white border-slate-200 text-slate-600 hover:border-indigo-300"
+                          }`}
+                        >
+                          {t.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Duration */}
+                  <div className="space-y-1">
+                    <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Duration</p>
+                    <div className="flex gap-1.5">
+                      {([5, 8, 12] as const).map((d) => (
+                        <button
+                          key={d}
+                          onClick={() => setVideoDuration(d)}
+                          className={`flex-1 text-[11px] px-2.5 py-1 rounded-full border transition ${
+                            videoDuration === d
+                              ? "bg-slate-900 border-slate-900 text-white"
+                              : "bg-white border-slate-200 text-slate-600 hover:border-slate-400"
+                          }`}
+                        >
+                          {d}s
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Preview toggle (CSS only, no audio) */}
                   <Button
                     onClick={() => setAnimPlaying((v) => !v)}
                     size="sm"
-                    className={`w-full ${animPlaying ? "bg-slate-700 hover:bg-slate-800 text-white" : "bg-gradient-to-r from-fuchsia-600 to-violet-600 hover:from-fuchsia-700 hover:to-violet-700 text-white"}`}
+                    variant="outline"
+                    className="w-full text-xs"
                   >
-                    <Film className="mr-2 h-4 w-4" />
-                    {animPlaying ? "Stop Animation" : "Play Animation"}
+                    <Film className="mr-2 h-3.5 w-3.5" />
+                    {animPlaying ? "Stop motion preview" : "Quick motion preview (no audio)"}
                   </Button>
+
+                  {/* Generate video */}
+                  <Button
+                    onClick={handleGenerateVideo}
+                    disabled={videoBusy}
+                    size="sm"
+                    className="w-full bg-gradient-to-r from-fuchsia-600 to-violet-600 hover:from-fuchsia-700 hover:to-violet-700 text-white"
+                  >
+                    {videoBusy ? (
+                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Rendering… {Math.round(videoProgress * 100)}%</>
+                    ) : (
+                      <><Film className="mr-2 h-4 w-4" /> Generate Video</>
+                    )}
+                  </Button>
+
+                  {videoBusy && (
+                    <div className="h-1.5 rounded-full bg-slate-200 overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-fuchsia-500 to-violet-600 transition-all"
+                        style={{ width: `${Math.max(4, videoProgress * 100)}%` }}
+                      />
+                    </div>
+                  )}
+
+                  {videoUrl && !videoBusy && (
+                    <div className="rounded-lg border border-violet-200 bg-white p-2 space-y-2">
+                      <video
+                        src={videoUrl}
+                        controls
+                        autoPlay
+                        loop
+                        className="w-full rounded-md bg-black"
+                      />
+                      <a
+                        href={videoUrl}
+                        download={`animated-${animStyle}-${videoTheme}.webm`}
+                        className="inline-flex items-center justify-center gap-1.5 w-full text-xs font-medium bg-violet-600 hover:bg-violet-700 text-white px-3 py-2 rounded-md transition"
+                      >
+                        <Download className="h-3.5 w-3.5" /> Download video
+                      </a>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
