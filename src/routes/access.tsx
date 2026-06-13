@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Sparkles, Image as ImageIcon, Wand2, Upload, Film, RefreshCw,
   Loader2, KeyRound, LockOpen, ArrowLeft, Bot, User, Send, Square,
-  AlertCircle,
+  AlertCircle, Download,
 } from "lucide-react";
 import { toast } from "sonner";
 
