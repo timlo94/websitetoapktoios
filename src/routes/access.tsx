@@ -114,6 +114,48 @@ function GuestStudio({ pin, onLock }: { pin: string; onLock: () => void }) {
   const [refinePrompt, setRefinePrompt] = useState(CARTOON_PROMPT);
   const [refining, setRefining] = useState(false);
   const [comparison, setComparison] = useState<{ original: string; cartoon: string } | null>(null);
+  const [collageUrl, setCollageUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!comparison) { setCollageUrl(null); return; }
+    let cancelled = false;
+    const load = (src: string) => new Promise<HTMLImageElement>((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = src;
+    });
+    (async () => {
+      try {
+        const [a, b] = await Promise.all([load(comparison.original), load(comparison.cartoon)]);
+        const h = Math.max(a.height, b.height, 512);
+        const wA = Math.round((a.width / a.height) * h);
+        const wB = Math.round((b.width / b.height) * h);
+        const gap = 16;
+        const labelH = 48;
+        const canvas = document.createElement("canvas");
+        canvas.width = wA + wB + gap;
+        canvas.height = h + labelH;
+        const ctx = canvas.getContext("2d")!;
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(a, 0, 0, wA, h);
+        ctx.drawImage(b, wA + gap, 0, wB, h);
+        ctx.fillStyle = "#0f172a";
+        ctx.font = "bold 20px system-ui, sans-serif";
+        ctx.textBaseline = "middle";
+        ctx.textAlign = "center";
+        ctx.fillText("Original", wA / 2, h + labelH / 2);
+        ctx.fillText("Cartoon", wA + gap + wB / 2, h + labelH / 2);
+        const url = canvas.toDataURL("image/png");
+        if (!cancelled) setCollageUrl(url);
+      } catch {
+        if (!cancelled) setCollageUrl(null);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [comparison]);
 
   const [animStyle, setAnimStyle] = useState<"kenburns" | "panLeft" | "panRight" | "zoomIn" | "float">("kenburns");
   const [animPlaying, setAnimPlaying] = useState(false);
