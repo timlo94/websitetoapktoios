@@ -215,19 +215,35 @@ function GuestStudio({ pin, onLock }: { pin: string; onLock: () => void }) {
     }
   };
 
-  const handleUpload = (file: File) => {
+  const handleUpload = async (file: File) => {
     if (!file.type.startsWith("image/")) { toast.error("Please choose an image file"); return; }
     if (file.size > 6 * 1024 * 1024) { toast.error("Image too large (max 6MB)"); return; }
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = typeof reader.result === "string" ? reader.result : null;
-      if (!result) return;
-      setImgUrl(result);
+    try {
+      // Normalize EXIF orientation so AI receives an upright image (strips EXIF).
+      const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" } as ImageBitmapOptions);
+      const canvas = document.createElement("canvas");
+      canvas.width = bitmap.width;
+      canvas.height = bitmap.height;
+      const ctx = canvas.getContext("2d")!;
+      ctx.drawImage(bitmap, 0, 0);
+      bitmap.close?.();
+      const dataUrl = canvas.toDataURL("image/png");
+      setImgUrl(dataUrl);
       setImgFinal(true);
       setAnimPlaying(false);
       toast.success("Image uploaded");
-    };
-    reader.readAsDataURL(file);
+    } catch {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = typeof reader.result === "string" ? reader.result : null;
+        if (!result) return;
+        setImgUrl(result);
+        setImgFinal(true);
+        setAnimPlaying(false);
+        toast.success("Image uploaded");
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleRefine = async () => {
