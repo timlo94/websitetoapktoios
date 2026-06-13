@@ -177,6 +177,7 @@ function GuestStudio({ pin, onLock }: { pin: string; onLock: () => void }) {
     onError: (e) => toast.error(e.message || "SyncBot error"),
   });
   const [chatInput, setChatInput] = useState("");
+  const [chatOpen, setChatOpen] = useState(false);
   const chatBusy = status === "submitted" || status === "streaming";
 
   useEffect(() => {
