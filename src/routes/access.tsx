@@ -159,6 +159,50 @@ function GuestStudio({ pin, onLock }: { pin: string; onLock: () => void }) {
 
   const [animStyle, setAnimStyle] = useState<"kenburns" | "panLeft" | "panRight" | "zoomIn" | "float">("kenburns");
   const [animPlaying, setAnimPlaying] = useState(false);
+  const [videoTheme, setVideoTheme] = useState<"none" | "vintage" | "noir" | "vibrant" | "dreamy" | "neon">("none");
+  const [videoMusic, setVideoMusic] = useState<"none" | "chill" | "cinematic" | "upbeat" | "ambient" | "dramatic">("chill");
+  const [videoDuration, setVideoDuration] = useState<5 | 8 | 12>(8);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [videoBusy, setVideoBusy] = useState(false);
+  const [videoProgress, setVideoProgress] = useState(0);
+
+  useEffect(() => {
+    return () => { if (videoUrl) URL.revokeObjectURL(videoUrl); };
+  }, [videoUrl]);
+
+  // Invalidate any prior generated video whenever the source image changes
+  useEffect(() => {
+    setVideoUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return null;
+    });
+  }, [imgUrl]);
+
+  const handleGenerateVideo = async () => {
+    if (!imgUrl) { toast.error("Upload or generate an image first"); return; }
+    setVideoBusy(true);
+    setVideoProgress(0);
+    if (videoUrl) { URL.revokeObjectURL(videoUrl); setVideoUrl(null); }
+    try {
+      const { exportAnimatedVideo } = await import("@/lib/videoExport");
+      const blob = await exportAnimatedVideo({
+        imageUrl: imgUrl,
+        motion: animStyle,
+        theme: videoTheme,
+        music: videoMusic,
+        durationSec: videoDuration,
+        onProgress: (p) => setVideoProgress(p),
+      });
+      const url = URL.createObjectURL(blob);
+      setVideoUrl(url);
+      toast.success("Video ready — preview and download below");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Video export failed");
+    } finally {
+      setVideoBusy(false);
+      setVideoProgress(0);
+    }
+  };
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const chatScrollRef = useRef<HTMLDivElement>(null);
