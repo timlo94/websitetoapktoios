@@ -227,8 +227,8 @@ function Stat({ label, value }: { label: string; value: number }) {
 function Th({ children }: { children: React.ReactNode }) {
   return <th className="text-left px-5 py-2 font-medium">{children}</th>;
 }
-function Td({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return <td className={`px-5 py-2 ${className}`}>{children}</td>;
+function Td({ children, className = "", title }: { children: React.ReactNode; className?: string; title?: string }) {
+  return <td className={`px-5 py-2 ${className}`} title={title}>{children}</td>;
 }
 function fmt(iso: string) {
   try { return new Date(iso).toLocaleString(); } catch { return iso; }
