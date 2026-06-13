@@ -110,8 +110,10 @@ function GuestStudio({ pin, onLock }: { pin: string; onLock: () => void }) {
   const [imgLoading, setImgLoading] = useState(false);
   const [imgFinal, setImgFinal] = useState(false);
 
-  const [refinePrompt, setRefinePrompt] = useState("");
+  const CARTOON_PROMPT = "turn the photo into cartoon";
+  const [refinePrompt, setRefinePrompt] = useState(CARTOON_PROMPT);
   const [refining, setRefining] = useState(false);
+  const [comparison, setComparison] = useState<{ original: string; cartoon: string } | null>(null);
 
   const [animStyle, setAnimStyle] = useState<"kenburns" | "panLeft" | "panRight" | "zoomIn" | "float">("kenburns");
   const [animPlaying, setAnimPlaying] = useState(false);
@@ -188,19 +190,29 @@ function GuestStudio({ pin, onLock }: { pin: string; onLock: () => void }) {
   const handleRefine = async () => {
     if (!imgUrl) { toast.error("Upload or generate an image first"); return; }
     if (!refinePrompt.trim()) { toast.error("Describe how to refine"); return; }
+    const isCartoon = refinePrompt.trim().toLowerCase() === CARTOON_PROMPT;
+    const originalSnapshot = imgUrl;
     setRefining(true);
     setImgFinal(false);
+    setComparison(null);
     try {
       const { streamImage } = await import("@/lib/streamImage");
+      let finalUrl = imgUrl;
       await streamImage(
         "/api/public/edit-image",
         refinePrompt,
-        { extraBody: { pin }, image: imgUrl },
+        { extraBody: { pin }, image: originalSnapshot },
         (dataUrl, isFinal) => {
           setImgUrl(dataUrl);
-          if (isFinal) setImgFinal(true);
+          if (isFinal) {
+            setImgFinal(true);
+            finalUrl = dataUrl;
+          }
         },
       );
+      if (isCartoon) {
+        setComparison({ original: originalSnapshot, cartoon: finalUrl });
+      }
       toast.success("Image refined");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Refine failed");
@@ -303,9 +315,8 @@ function GuestStudio({ pin, onLock }: { pin: string; onLock: () => void }) {
                 }}
               />
               <Button
-                variant="outline"
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full border-dashed"
+                className="w-full bg-red-600 hover:bg-red-700 text-white border border-red-700"
               >
                 <Upload className="mr-2 h-4 w-4" /> Upload Your Own Image
               </Button>
@@ -318,9 +329,10 @@ function GuestStudio({ pin, onLock }: { pin: string; onLock: () => void }) {
                   <Textarea
                     value={refinePrompt}
                     onChange={(e) => setRefinePrompt(e.target.value)}
-                    placeholder="e.g. make the lighting warmer, add a sunset sky"
+                    placeholder="turn the photo into cartoon"
                     className="min-h-[70px] resize-none text-sm bg-white"
                   />
+                  <p className="text-[10px] text-slate-500">Tip: leave the default to get a side-by-side original vs cartoon result.</p>
                   <Button
                     onClick={handleRefine}
                     disabled={refining || !refinePrompt.trim()}
@@ -372,6 +384,30 @@ function GuestStudio({ pin, onLock }: { pin: string; onLock: () => void }) {
                   </div>
                 )}
               </div>
+
+              {comparison && (
+                <div className="rounded-lg border border-violet-200 bg-white p-3 space-y-2">
+                  <Label className="text-xs font-semibold text-slate-700 flex items-center gap-1">
+                    <Wand2 className="h-3 w-3" /> Original vs Cartoon
+                  </Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <div className="aspect-square rounded-md overflow-hidden border border-slate-200 bg-slate-50">
+                        <img src={comparison.original} alt="Original" className="h-full w-full object-cover" />
+                      </div>
+                      <p className="text-[10px] text-center text-slate-500 font-medium">Original</p>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="aspect-square rounded-md overflow-hidden border border-violet-300 bg-slate-50">
+                        <img src={comparison.cartoon} alt="Cartoon" className="h-full w-full object-cover" />
+                      </div>
+                      <p className="text-[10px] text-center text-violet-700 font-medium">Cartoon</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+
 
               {imgUrl && imgFinal && (
                 <div className="rounded-lg border border-slate-200 bg-white/70 p-3 space-y-2">
