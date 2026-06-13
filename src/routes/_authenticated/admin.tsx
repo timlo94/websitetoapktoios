@@ -2,11 +2,12 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { getAdminData } from "@/lib/admin.functions";
+import { getVisitorLogs } from "@/lib/visitor-logs.functions";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ShieldCheck, ArrowLeft, AlertTriangle } from "lucide-react";
+import { ShieldCheck, ArrowLeft, AlertTriangle, Globe } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   codeSplitGroupings: [],
@@ -17,9 +18,15 @@ export const Route = createFileRoute("/_authenticated/admin")({
 function AdminPage() {
   const navigate = useNavigate();
   const fetchAdmin = useServerFn(getAdminData);
+  const fetchVisitors = useServerFn(getVisitorLogs);
   const { data, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ["admin-data"],
     queryFn: () => fetchAdmin(),
+    retry: false,
+  });
+  const visitorsQ = useQuery({
+    queryKey: ["visitor-logs"],
+    queryFn: () => fetchVisitors(),
     retry: false,
   });
 
@@ -39,7 +46,7 @@ function AdminPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={() => refetch()} disabled={isFetching}>
+            <Button variant="ghost" size="sm" onClick={() => { refetch(); visitorsQ.refetch(); }} disabled={isFetching}>
               Refresh
             </Button>
             <Button variant="outline" size="sm" onClick={() => navigate({ to: "/" })}>
@@ -150,6 +157,55 @@ function AdminPage() {
               </div>
             </Card>
 
+            <Card className="p-0 overflow-hidden">
+              <div className="px-5 py-3 border-b bg-white flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Globe className="h-4 w-4 text-slate-500" />
+                  <h2 className="font-semibold text-sm">Visitor logs (last 200)</h2>
+                </div>
+                <Badge variant="secondary">{visitorsQ.data?.total ?? 0} total · 90d retention</Badge>
+              </div>
+              {visitorsQ.isLoading && <div className="p-6"><Skeleton className="h-24" /></div>}
+              {visitorsQ.error && (
+                <p className="px-5 py-4 text-sm text-red-600">{(visitorsQ.error as Error).message}</p>
+              )}
+              {visitorsQ.data && (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-slate-50 text-slate-600">
+                      <tr>
+                        <Th>When</Th>
+                        <Th>IP</Th>
+                        <Th>Country</Th>
+                        <Th>Path</Th>
+                        <Th>User</Th>
+                        <Th>User Agent</Th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {visitorsQ.data.logs.length === 0 && (
+                        <tr><td colSpan={6} className="px-5 py-8 text-center text-slate-500">No visits logged yet.</td></tr>
+                      )}
+                      {visitorsQ.data.logs.map((v) => (
+                        <tr key={v.id} className="border-t">
+                          <Td className="whitespace-nowrap">{fmt(v.created_at)}</Td>
+                          <Td className="font-mono text-xs">{v.ip_address ?? "—"}</Td>
+                          <Td>{v.country ?? "—"}</Td>
+                          <Td className="max-w-[200px] truncate">{v.path ?? "—"}</Td>
+                          <Td className="font-mono text-xs text-slate-500">
+                            {v.user_id ? `${v.user_id.slice(0, 8)}…` : "guest"}
+                          </Td>
+                          <Td className="max-w-[280px] truncate text-xs text-slate-500" title={v.user_agent ?? ""}>
+                            {v.user_agent ?? "—"}
+                          </Td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </Card>
+
             <p className="text-xs text-slate-500">
               Tip: open <Link to="/" className="underline">the workspace</Link> to keep working.
             </p>
@@ -171,8 +227,8 @@ function Stat({ label, value }: { label: string; value: number }) {
 function Th({ children }: { children: React.ReactNode }) {
   return <th className="text-left px-5 py-2 font-medium">{children}</th>;
 }
-function Td({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return <td className={`px-5 py-2 ${className}`}>{children}</td>;
+function Td({ children, className = "", title }: { children: React.ReactNode; className?: string; title?: string }) {
+  return <td className={`px-5 py-2 ${className}`} title={title}>{children}</td>;
 }
 function fmt(iso: string) {
   try { return new Date(iso).toLocaleString(); } catch { return iso; }
