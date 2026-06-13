@@ -521,7 +521,7 @@ function GuestStudio({ pin, onLock }: { pin: string; onLock: () => void }) {
                     onClick={handleRefine}
                     disabled={refining || !refinePrompt.trim()}
                     size="sm"
-                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
+                    className="w-full bg-pink-600 hover:bg-pink-700 text-white"
                   >
                     {refining ? (
                       <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Refining…</>
