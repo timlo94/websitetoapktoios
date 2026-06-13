@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Sparkles, Image as ImageIcon, Wand2, Upload, Film, RefreshCw,
   Loader2, KeyRound, LockOpen, ArrowLeft, Bot, User, Send, Square,
-  AlertCircle,
+  AlertCircle, Download,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -395,13 +395,31 @@ function GuestStudio({ pin, onLock }: { pin: string; onLock: () => void }) {
                       <div className="aspect-square rounded-md overflow-hidden border border-slate-200 bg-slate-50">
                         <img src={comparison.original} alt="Original" className="h-full w-full object-cover" />
                       </div>
-                      <p className="text-[10px] text-center text-slate-500 font-medium">Original</p>
+                      <div className="flex items-center justify-between px-0.5">
+                        <p className="text-[10px] text-slate-500 font-medium">Original</p>
+                        <a
+                          href={comparison.original}
+                          download="original.png"
+                          className="text-[10px] inline-flex items-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 py-0.5 rounded-full transition"
+                        >
+                          <Download className="h-3 w-3" /> Download
+                        </a>
+                      </div>
                     </div>
                     <div className="space-y-1">
                       <div className="aspect-square rounded-md overflow-hidden border border-violet-300 bg-slate-50">
                         <img src={comparison.cartoon} alt="Cartoon" className="h-full w-full object-cover" />
                       </div>
-                      <p className="text-[10px] text-center text-violet-700 font-medium">Cartoon</p>
+                      <div className="flex items-center justify-between px-0.5">
+                        <p className="text-[10px] text-violet-700 font-medium">Cartoon</p>
+                        <a
+                          href={comparison.cartoon}
+                          download="cartoon.png"
+                          className="text-[10px] inline-flex items-center gap-1 bg-violet-100 hover:bg-violet-200 text-violet-700 px-2 py-0.5 rounded-full transition"
+                        >
+                          <Download className="h-3 w-3" /> Download
+                        </a>
+                      </div>
                     </div>
                   </div>
                 </div>
