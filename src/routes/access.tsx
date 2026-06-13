@@ -315,9 +315,8 @@ function GuestStudio({ pin, onLock }: { pin: string; onLock: () => void }) {
                 }}
               />
               <Button
-                variant="outline"
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full border-dashed"
+                className="w-full bg-red-600 hover:bg-red-700 text-white border border-red-700"
               >
                 <Upload className="mr-2 h-4 w-4" /> Upload Your Own Image
               </Button>
@@ -330,9 +329,10 @@ function GuestStudio({ pin, onLock }: { pin: string; onLock: () => void }) {
                   <Textarea
                     value={refinePrompt}
                     onChange={(e) => setRefinePrompt(e.target.value)}
-                    placeholder="e.g. make the lighting warmer, add a sunset sky"
+                    placeholder="turn the photo into cartoon"
                     className="min-h-[70px] resize-none text-sm bg-white"
                   />
+                  <p className="text-[10px] text-slate-500">Tip: leave the default to get a side-by-side original vs cartoon result.</p>
                   <Button
                     onClick={handleRefine}
                     disabled={refining || !refinePrompt.trim()}
