@@ -2,11 +2,12 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { getAdminData } from "@/lib/admin.functions";
+import { getVisitorLogs } from "@/lib/visitor-logs.functions";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ShieldCheck, ArrowLeft, AlertTriangle } from "lucide-react";
+import { ShieldCheck, ArrowLeft, AlertTriangle, Globe } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   codeSplitGroupings: [],
@@ -17,9 +18,15 @@ export const Route = createFileRoute("/_authenticated/admin")({
 function AdminPage() {
   const navigate = useNavigate();
   const fetchAdmin = useServerFn(getAdminData);
+  const fetchVisitors = useServerFn(getVisitorLogs);
   const { data, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ["admin-data"],
     queryFn: () => fetchAdmin(),
+    retry: false,
+  });
+  const visitorsQ = useQuery({
+    queryKey: ["visitor-logs"],
+    queryFn: () => fetchVisitors(),
     retry: false,
   });
 
@@ -39,7 +46,7 @@ function AdminPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={() => refetch()} disabled={isFetching}>
+            <Button variant="ghost" size="sm" onClick={() => { refetch(); visitorsQ.refetch(); }} disabled={isFetching}>
               Refresh
             </Button>
             <Button variant="outline" size="sm" onClick={() => navigate({ to: "/" })}>
