@@ -110,8 +110,10 @@ function GuestStudio({ pin, onLock }: { pin: string; onLock: () => void }) {
   const [imgLoading, setImgLoading] = useState(false);
   const [imgFinal, setImgFinal] = useState(false);
 
-  const [refinePrompt, setRefinePrompt] = useState("");
+  const CARTOON_PROMPT = "turn the photo into cartoon";
+  const [refinePrompt, setRefinePrompt] = useState(CARTOON_PROMPT);
   const [refining, setRefining] = useState(false);
+  const [comparison, setComparison] = useState<{ original: string; cartoon: string } | null>(null);
 
   const [animStyle, setAnimStyle] = useState<"kenburns" | "panLeft" | "panRight" | "zoomIn" | "float">("kenburns");
   const [animPlaying, setAnimPlaying] = useState(false);
