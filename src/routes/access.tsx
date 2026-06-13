@@ -190,19 +190,29 @@ function GuestStudio({ pin, onLock }: { pin: string; onLock: () => void }) {
   const handleRefine = async () => {
     if (!imgUrl) { toast.error("Upload or generate an image first"); return; }
     if (!refinePrompt.trim()) { toast.error("Describe how to refine"); return; }
+    const isCartoon = refinePrompt.trim().toLowerCase() === CARTOON_PROMPT;
+    const originalSnapshot = imgUrl;
     setRefining(true);
     setImgFinal(false);
+    setComparison(null);
     try {
       const { streamImage } = await import("@/lib/streamImage");
+      let finalUrl = imgUrl;
       await streamImage(
         "/api/public/edit-image",
         refinePrompt,
-        { extraBody: { pin }, image: imgUrl },
+        { extraBody: { pin }, image: originalSnapshot },
         (dataUrl, isFinal) => {
           setImgUrl(dataUrl);
-          if (isFinal) setImgFinal(true);
+          if (isFinal) {
+            setImgFinal(true);
+            finalUrl = dataUrl;
+          }
         },
       );
+      if (isCartoon) {
+        setComparison({ original: originalSnapshot, cartoon: finalUrl });
+      }
       toast.success("Image refined");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Refine failed");
