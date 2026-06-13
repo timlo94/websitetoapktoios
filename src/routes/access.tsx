@@ -261,32 +261,39 @@ function GuestStudio({ pin, onLock }: { pin: string; onLock: () => void }) {
 
   const handleUpload = async (file: File) => {
     if (!file.type.startsWith("image/")) { toast.error("Please choose an image file"); return; }
-    if (file.size > 6 * 1024 * 1024) { toast.error("Image too large (max 6MB)"); return; }
+    if (file.size > 20 * 1024 * 1024) { toast.error("Image too large (max 20MB)"); return; }
     try {
-      // Normalize EXIF orientation so AI receives an upright image (strips EXIF).
-      const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" } as ImageBitmapOptions);
+      // Normalize EXIF orientation, downscale, and encode as JPEG to stay
+      // under the server's ~6MB base64 limit (mobile photos are huge).
+      let bitmap: ImageBitmap;
+      try {
+        bitmap = await createImageBitmap(file, { imageOrientation: "from-image" } as ImageBitmapOptions);
+      } catch {
+        bitmap = await createImageBitmap(file);
+      }
+      const MAX_DIM = 1536;
+      const scale = Math.min(1, MAX_DIM / Math.max(bitmap.width, bitmap.height));
+      const w = Math.round(bitmap.width * scale);
+      const h = Math.round(bitmap.height * scale);
       const canvas = document.createElement("canvas");
-      canvas.width = bitmap.width;
-      canvas.height = bitmap.height;
+      canvas.width = w;
+      canvas.height = h;
       const ctx = canvas.getContext("2d")!;
-      ctx.drawImage(bitmap, 0, 0);
+      ctx.drawImage(bitmap, 0, 0, w, h);
       bitmap.close?.();
-      const dataUrl = canvas.toDataURL("image/png");
+      // Step down JPEG quality until base64 payload fits comfortably under 6MB.
+      let quality = 0.9;
+      let dataUrl = canvas.toDataURL("image/jpeg", quality);
+      while (dataUrl.length > 5_500_000 && quality > 0.4) {
+        quality -= 0.1;
+        dataUrl = canvas.toDataURL("image/jpeg", quality);
+      }
       setImgUrl(dataUrl);
       setImgFinal(true);
       setAnimPlaying(false);
       toast.success("Image uploaded");
-    } catch {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const result = typeof reader.result === "string" ? reader.result : null;
-        if (!result) return;
-        setImgUrl(result);
-        setImgFinal(true);
-        setAnimPlaying(false);
-        toast.success("Image uploaded");
-      };
-      reader.readAsDataURL(file);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not read image");
     }
   };
 
