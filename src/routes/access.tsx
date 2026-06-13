@@ -385,6 +385,30 @@ function GuestStudio({ pin, onLock }: { pin: string; onLock: () => void }) {
                 )}
               </div>
 
+              {comparison && (
+                <div className="rounded-lg border border-violet-200 bg-white p-3 space-y-2">
+                  <Label className="text-xs font-semibold text-slate-700 flex items-center gap-1">
+                    <Wand2 className="h-3 w-3" /> Original vs Cartoon
+                  </Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <div className="aspect-square rounded-md overflow-hidden border border-slate-200 bg-slate-50">
+                        <img src={comparison.original} alt="Original" className="h-full w-full object-cover" />
+                      </div>
+                      <p className="text-[10px] text-center text-slate-500 font-medium">Original</p>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="aspect-square rounded-md overflow-hidden border border-violet-300 bg-slate-50">
+                        <img src={comparison.cartoon} alt="Cartoon" className="h-full w-full object-cover" />
+                      </div>
+                      <p className="text-[10px] text-center text-violet-700 font-medium">Cartoon</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+
+
               {imgUrl && imgFinal && (
                 <div className="rounded-lg border border-slate-200 bg-white/70 p-3 space-y-2">
                   <Label className="text-xs font-semibold text-slate-700 flex items-center gap-1">
