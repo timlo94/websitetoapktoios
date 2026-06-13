@@ -429,40 +429,28 @@ function GuestStudio({ pin, onLock }: { pin: string; onLock: () => void }) {
 
               {comparison && (
                 <div className="rounded-lg border border-violet-200 bg-white p-3 space-y-2">
-                  <Label className="text-xs font-semibold text-slate-700 flex items-center gap-1">
-                    <Wand2 className="h-3 w-3" /> Original vs Cartoon
-                  </Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="space-y-1">
-                      <div className="aspect-square rounded-md overflow-hidden border border-slate-200 bg-slate-50">
-                        <img src={comparison.original} alt="Original" className="h-full w-full object-cover" />
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs font-semibold text-slate-700 flex items-center gap-1">
+                      <Wand2 className="h-3 w-3" /> Original vs Cartoon
+                    </Label>
+                    {collageUrl && (
+                      <a
+                        href={collageUrl}
+                        download="original-vs-cartoon.png"
+                        className="text-[11px] inline-flex items-center gap-1 bg-violet-600 hover:bg-violet-700 text-white px-2.5 py-1 rounded-full transition"
+                      >
+                        <Download className="h-3 w-3" /> Download collage
+                      </a>
+                    )}
+                  </div>
+                  <div className="rounded-md overflow-hidden border border-slate-200 bg-slate-50">
+                    {collageUrl ? (
+                      <img src={collageUrl} alt="Original vs Cartoon" className="w-full h-auto block" />
+                    ) : (
+                      <div className="aspect-[2/1] grid place-items-center text-[11px] text-slate-500">
+                        Building collage…
                       </div>
-                      <div className="flex items-center justify-between px-0.5">
-                        <p className="text-[10px] text-slate-500 font-medium">Original</p>
-                        <a
-                          href={comparison.original}
-                          download="original.png"
-                          className="text-[10px] inline-flex items-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 py-0.5 rounded-full transition"
-                        >
-                          <Download className="h-3 w-3" /> Download
-                        </a>
-                      </div>
-                    </div>
-                    <div className="space-y-1">
-                      <div className="aspect-square rounded-md overflow-hidden border border-violet-300 bg-slate-50">
-                        <img src={comparison.cartoon} alt="Cartoon" className="h-full w-full object-cover" />
-                      </div>
-                      <div className="flex items-center justify-between px-0.5">
-                        <p className="text-[10px] text-violet-700 font-medium">Cartoon</p>
-                        <a
-                          href={comparison.cartoon}
-                          download="cartoon.png"
-                          className="text-[10px] inline-flex items-center gap-1 bg-violet-100 hover:bg-violet-200 text-violet-700 px-2 py-0.5 rounded-full transition"
-                        >
-                          <Download className="h-3 w-3" /> Download
-                        </a>
-                      </div>
-                    </div>
+                    )}
                   </div>
                 </div>
               )}
