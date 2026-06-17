@@ -1,21 +1,30 @@
-# STAGE 1: Build the full-stack application
-FROM node:20-alpine
+# STAGE 1: Build the app
+FROM node:20-alpine AS builder
 WORKDIR /app
-COPY package*.json ./
 
-# Install dependencies
+# Copy package files and install dependencies
+COPY package*.json ./
 RUN npm install
 
-# Copy all files
+# Copy all source code and build the application
 COPY . .
-
-# Build both the client (frontend) and server (backend)
 RUN npm run build
 
-# Tell Cloud Run which port to use
-EXPOSE 8080
+# STAGE 2: Run the app in production
+FROM node:20-alpine
+WORKDIR /app
+
+# Copy the compiled build and package config from the builder stage
+COPY --from=builder /app/dist /app/dist
+COPY --from=builder /app/package.json ./
+
+# Install only the dependencies needed to run the app
+RUN npm install --production
+
+# Strictly enforce Cloud Run's environment variables
 ENV PORT=8080
 ENV HOST=0.0.0.0
+EXPOSE 8080
 
-# Start the actual TanStack server
-CMD ["npm", "start"]
+# Launch the TanStack server using the exact file Vite generated
+CMD ["node", "dist/server/server.js"]
