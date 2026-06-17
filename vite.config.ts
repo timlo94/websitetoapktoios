@@ -1,8 +1,10 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 export default defineConfig({
-  // Force Lovable to build the Nitro SSR server!
-  nitro: true,
+  // Tell Nitro to build specifically for a standard Node container, not Cloudflare
+  nitro: {
+    preset: "node-server"
+  },
   
   tanstackStart: {
     server: { entry: "server" },
