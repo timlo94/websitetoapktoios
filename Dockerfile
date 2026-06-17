@@ -1,22 +1,21 @@
-# STAGE 1: Build the app
-FROM node:20-alpine AS builder
+# STAGE 1: Build the full-stack application
+FROM node:20-alpine
 WORKDIR /app
 COPY package*.json ./
+
+# Install dependencies
 RUN npm install
+
+# Copy all files
 COPY . .
+
+# Build both the client (frontend) and server (backend)
 RUN npm run build
 
-# STAGE 2: Serve the app
-FROM nginx:alpine
-
-# 1. DELETE the default "Welcome to nginx" page so it doesn't block your app
-RUN rm -rf /usr/share/nginx/html/*
-
-# 2. Copy the app files into the empty folder
-COPY --from=builder /app/dist /usr/share/nginx/html
-
-# 3. Copy the Nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
+# Tell Cloud Run which port to use
 EXPOSE 8080
-CMD ["nginx", "-g", "daemon off;"]
+ENV PORT=8080
+ENV HOST=0.0.0.0
+
+# Start the actual TanStack server
+CMD ["npm", "start"]
