@@ -2,22 +2,22 @@
 FROM node:20-alpine
 WORKDIR /app
 
-# Copy package files
+# Copy package files and install dependencies
 COPY package*.json ./
-
-# Install ALL dependencies (Keeping Vite installed!)
 RUN npm install
 
 # Copy application code
 COPY . .
 
-# Build the application
+# Build the application (Nitro will now build the server!)
 RUN npm run build
 
-# Set Cloud Run port variables
-EXPOSE 8080
+# Cloud Run enforces the PORT environment variable
 ENV PORT=8080
 ENV HOST=0.0.0.0
+ENV NODE_ENV=production
 
-# Start the app using the new package.json script
+EXPOSE 8080
+
+# Run the Nitro built server using the package.json script
 CMD ["npm", "run", "start"]

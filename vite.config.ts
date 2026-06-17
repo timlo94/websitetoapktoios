@@ -1,15 +1,10 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-// ... your other imports ...
+import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 export default defineConfig({
-  plugins: [react()],
+  // Force Lovable to build the Nitro SSR server!
+  nitro: true,
   
-  // ADD THIS PREVIEW BLOCK:
-  preview: {
-    port: 8080,
-    allowedHosts: true, // This explicitly tells Vite to allow Cloud Run's URLs
+  tanstackStart: {
+    server: { entry: "server" },
   },
-  
-  // ... the rest of your existing config ...
 });
