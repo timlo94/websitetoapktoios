@@ -1,0 +1,8 @@
+steps:
+  # 1. Build the container using your Lovable Dockerfile
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/saaslovable:$COMMIT_SHA', '.']
+
+# 2. This explicitly fixes the Service Account logging error
+options:
+  logging: CLOUD_LOGGING_ONLY
