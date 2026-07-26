@@ -1,74 +1,111 @@
-# Community-Distributed Dynamic Update Architecture (CDDUA)
+# Web → APK & iOS Builder (`websitetoapktoios`)
 
-An end-to-end algorithmic framework that detects changes to a web application (HTML, CSS, JS) and automatically propagates delta updates directly to a community-distributed Android application (APK) in real time, bypassing App Store update mechanisms while maintaining strict cryptographic security and atomic filesystem stability.
+> **100% Free & Open Source for Everyone!**  
+> Turn any website or Web Application into native **Android APKs** and **iOS Xcode Projects** instantly.
 
-## Repository Structure
+---
 
-```
-mobileappwebsitechange/
-├── server/                     # Module A & B: Backend Diffing, Signing & Transport Server
-│   ├── package.json
-│   ├── src/
-│   │   ├── index.js            # Main Express & Socket.io server
-│   │   ├── diffing/
-│   │   │   ├── merkle.js       # SHA-256 Merkle tree & manifest generator
-│   │   │   └── patcher.js      # Delta diffing & Zip compression engine
-│   │   ├── security/
-│   │   │   └── signer.js       # Ed25519 asymmetric cryptographic signing
-│   │   └── routes/
-│   │       └── api.js          # REST API endpoints & admin simulation controls
-│   ├── keys/                   # Auto-generated Ed25519 keypair storage
-│   └── patches/                # Compressed delta zip archives
-├── webapp/                     # Source Web Application (Community Portal)
-│   ├── index.html
-│   ├── css/style.css           # Premium dark-mode glassmorphism design system
-│   └── js/
-│       ├── app.js              # Core UI logic & interactivity
-│       └── cddua-client.js     # WebSocket listener & hot-reload bridge
-├── admin-console/              # CDDUA Command Center (Live Simulation Console)
-│   ├── index.html
-│   ├── css/console.css
-│   └── js/console.js
-└── android/                    # Module C: Native Kotlin Android Client Container
-    ├── build.gradle.kts
-    ├── settings.gradle.kts
-    └── app/
-        ├── build.gradle.kts
-        └── src/main/
-            ├── AndroidManifest.xml
-            ├── assets/
-            │   └── www_initial/ # Bundled web application for initial offline setup
-            └── java/com/cddua/app/
-                ├── MainActivity.kt        # WebViewAssetLoader & virtual origin setup (https://app.local)
-                ├── cddua/
-                │   ├── CDDUAClient.kt     # Socket.io real-time update orchestrator
-                │   ├── SecurityManager.kt # Ed25519 signature verification (Hardcoded Server PubKey)
-                ├── PatchManager.kt    # Sandboxed storage & Atomic filesystem swap/rollback
-                └── JSBridge.kt        # JavaScript evaluation & hot-reload bridge
-```
+## 🌟 Overview
 
-## Quick Start & Verification
+**`websitetoapktoios`** is an end-to-end web-to-mobile transformation platform. Enter any website URL (such as `https://countries.malaysiapage.com/`) and automatically build:
 
-### 1. Start the Backend & Admin Console
+1. 📱 **Native Android App (APK & AAB)** ready to sideload or upload to Google Play Store.
+2. 🍏 **iOS Swift Xcode Project** ready to open, build, and run in Xcode on macOS.
+
+---
+
+## ✨ Features
+
+- 🌐 **1-Click Website Conversion**: Simply paste a URL to generate native wrapper apps.
+- 📱 **Native Android Container**:
+  - Built-in WebView wrapper configured for JavaScript, DOM storage, media playback, and hardware acceleration.
+  - Native back-button navigation support.
+- 📊 **Real-Time Gradle Progress Status**:
+  - Live progress bar with real-time feedback for every compilation phase:
+    - 🔧 Pre-build checks & resource merging
+    - 🔨 Kotlin/Java source compilation
+    - ⚡ DEX bytecode optimization
+    - 📱 APK packaging & verification
+- 🎨 **Automated App Icon Generator**:
+  - Automatically fetches the website's favicon (`apple-touch-icon`, PNG, ICO).
+  - Generates crisp launcher icons for all 5 Android density levels (`mipmap-mdpi`, `hdpi`, `xhdpi`, `xxhdpi`, `xxxhdpi`).
+- 🍏 **iOS Project Exporter**:
+  - 1-Click download of complete iOS Swift WKWebView Xcode projects.
+  - Includes `ViewController.swift`, `Info.plist`, `SceneDelegate.swift`, and `.xcodeproj` project structure.
+- ⚡ **Delta Update & Hot-Reload Engine**:
+  - Real-time WebSocket telemetry for instant content syncing and differential patch updates without requiring full APK updates.
+
+---
+
+## 🚀 Quick Start
+
+### 1. Prerequisites
+- **Node.js**: v18.0 or newer
+- **Java JDK**: JDK 17 (recommended for Gradle build compatibility)
+- **Android SDK / Android Studio** (Optional, required for building Android binaries on your machine)
+
+### 2. Installation
+
 ```bash
+# Clone the repository
+git clone https://github.com/timlo94/websitetoapktoios.git
+cd websitetoapktoios
+
+# Install backend dependencies
 cd server
 npm install
+```
+
+### 3. Launch the Application
+
+```bash
+# Start the server
 npm start
 ```
 
-Once running, open your browser to:
-- **CDDUA Command Center (Admin Dashboard)**: [http://localhost:3000/admin](http://localhost:3000/admin)
-- **Community Portal (Simulator)**: [http://localhost:3000/webapp](http://localhost:3000/webapp)
+Open your browser and navigate to:
+- 🌐 **Web → APK & iOS Builder UI**: [http://localhost:3000/](http://localhost:3000/)
+- ⚙️ **Admin Console & Telemetry**: [http://localhost:3000/admin](http://localhost:3000/admin)
 
-### 2. Run Automated Verification Suite
-To verify Ed25519 cryptographic signing, Merkle tree SHA-256 diffing, and delta zip compression savings:
-```bash
-cd server
-node test_cddua.js
+---
+
+## 📱 How to Use
+
+1. Enter your website URL (e.g. `https://countries.malaysiapage.com/`) and click **Scan**.
+2. **For Android**:
+   - Click **Build APK** to generate a signed Android APK with real-time status feedback.
+   - Click **Download APK** once ready to install on any Android device or emulator.
+3. **For iOS**:
+   - Click **Download iOS Project**.
+   - Unzip the downloaded file on a Mac, open the `.xcodeproj` file in **Xcode**, and press **⌘R** to run on an iPhone or Simulator.
+
+---
+
+## 🛠️ Project Architecture
+
+```
+websitetoapktoios/
+├── server/                     # Backend Server & Build Orchestrator
+│   ├── src/
+│   │   ├── index.js            # Express & Socket.io server entry point
+│   │   ├── scraper.js          # URL Asset Scraper & Favicon Extractor
+│   │   └── routes/
+│   │       └── api.js          # REST API (Build, Scan, Download APK & iOS)
+├── webapp/                     # Web to APK & iOS Builder Frontend Interface
+│   ├── index.html              # Main multi-step application UI
+│   ├── css/style.css           # Modern glassmorphism UI styles
+│   └── js/app.js               # Frontend state machine & progress handler
+├── admin-console/              # Live Telemetry & Simulation Console
+└── android/                    # Native Android Kotlin App Wrapper
+    ├── build.gradle.kts
+    └── app/src/main/
+        ├── AndroidManifest.xml
+        └── java/com/cddua/app/
+            └── MainActivity.kt # Native WebView Wrapper
 ```
 
-### 3. Build the Android APK Container
-1. Open the `/android` directory in **Android Studio**.
-2. Sync Gradle (installs `androidx.webkit`, `socket.io-client`, `okhttp`, and `bouncycastle`).
-3. Build the APK (`Build -> Build APK(s)`) and install on any Android 7.0+ device or emulator!
-4. On launch, the APK unpacks assets into sandboxed internal storage (`Context.getFilesDir() / "www"`), maps them to `https://app.local/`, and connects to the WebSocket server for instant zero-downtime hot-reloads!
+---
+
+## 📄 License
+
+This project is open-source and free for all under the [MIT License](LICENSE).
