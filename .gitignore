@@ -6,3 +6,25 @@ android/local.properties
 .DS_Store
 *.log
 NUL
+
+# Ignore leftover local workspace folders & templates from unrelated projects
+/.env
+/.lovable/
+/.prettierignore
+/.prettierrc
+/Dockerfile
+/app.json
+/bun.lock
+/bunfig.toml
+/cloudbuild.yaml
+/components.json
+/eas.json
+/eslint.config.js
+/package-lock.json
+/package.json
+/src/
+/supabase/
+/tsconfig.json
+/usmassignment1/
+/vista-asia-scope/
+/vite.config.ts
