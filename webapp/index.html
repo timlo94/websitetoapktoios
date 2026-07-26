@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Web → APK Builder</title>
+  <meta name="description" content="Scrape any website, compare versions, and build an Android APK automatically." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════════════
+       SCREEN 1 — HOME
+  ══════════════════════════════════════════════ -->
+  <div id="screen-home" class="screen active">
+    <div class="page-shell home-shell">
+
+      <!-- Top bar -->
+      <div class="topbar">
+        <div class="brand">
+          <div class="brand-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+          <span>Web → APK</span>
+        </div>
+        <div class="topbar-tag">Builder v2</div>
+      </div>
+
+      <!-- Hero -->
+      <div class="hero">
+        <div class="hero-badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Automatic · Versioned · APK-ready
+        </div>
+        <h1>Turn any website<br/>into an Android app</h1>
+        <p class="hero-sub">Paste a URL. We fetch HTML, CSS &amp; JS — detect what changed — and build a signed APK instantly.</p>
+      </div>
+
+      <!-- Input card -->
+      <div class="input-card">
+        <div class="input-card-label">Website URL</div>
+        <div class="url-row">
+          <div class="url-input-wrap">
+            <svg class="url-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            <input id="url-input" type="url" placeholder="https://your-website.com" spellcheck="false" autocomplete="off" />
+          </div>
+          <button id="btn-scan" class="btn btn-primary" onclick="startScan()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <span id="scan-label">Scan</span>
+          </button>
+        </div>
+
+        <div id="scan-progress" class="status-row hidden">
+          <div class="spinner"></div>
+          <span id="scan-msg">Fetching assets from website...</span>
+        </div>
+        <div id="scan-error" class="status-row error hidden">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          <span id="scan-error-msg">Something went wrong.</span>
+        </div>
+      </div>
+
+      <!-- Steps -->
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-text"><strong>Scan</strong><br/>Fetch all web assets</div>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-text"><strong>Changelog</strong><br/>See what changed</div>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-text"><strong>Build</strong><br/>Auto-generate APK</div>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-text"><strong>Download</strong><br/>Install on Android</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       SCREEN 2 — COMPARE / DIFF
+  ══════════════════════════════════════════════ -->
+  <div id="screen-compare" class="screen">
+    <div class="page-shell">
+
+      <div class="screen-header">
+        <button class="btn-back" onclick="goHome()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          New URL
+        </button>
+        <div class="screen-title">Scan Results</div>
+        <div class="scanned-url-pill" id="scanned-url">—</div>
+      </div>
+
+      <!-- Stats row -->
+      <div class="stats-bar">
+        <div class="stat added">
+          <div class="stat-num" id="stat-added">0</div>
+          <div class="stat-lbl">Added</div>
+        </div>
+        <div class="stat-sep"></div>
+        <div class="stat modified">
+          <div class="stat-num" id="stat-modified">0</div>
+          <div class="stat-lbl">Changed</div>
+        </div>
+        <div class="stat-sep"></div>
+        <div class="stat deleted">
+          <div class="stat-num" id="stat-deleted">0</div>
+          <div class="stat-lbl">Removed</div>
+        </div>
+        <div class="stat-sep"></div>
+        <div class="stat total">
+          <div class="stat-num" id="stat-total">0</div>
+          <div class="stat-lbl">Total files</div>
+        </div>
+      </div>
+
+      <div class="section-label" id="diff-summary-text">Computing diff...</div>
+
+      <!-- File list -->
+      <div class="file-list-card">
+        <div class="file-list" id="file-list"></div>
+      </div>
+
+      <!-- Actions -->
+      <div class="action-bar">
+        <button id="btn-changelog" class="btn btn-outline" onclick="showChangelog()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          View Changelog
+        </button>
+        <button id="btn-assets" class="btn btn-outline" onclick="downloadAssets()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Assets ZIP
+        </button>
+        <button id="btn-build" class="btn btn-primary" onclick="startBuild()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          Build APK
+        </button>
+        <button id="btn-ios-project" class="btn btn-outline" onclick="downloadIOSProject()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          iOS Project
+        </button>
+      </div>
+
+      <!-- Build progress -->
+      <div id="build-progress-row" class="progress-section hidden">
+        <div class="progress-header">
+          <span class="progress-label" id="build-msg">Starting build...</span>
+          <span class="progress-pct" id="build-pct">0%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="build-bar"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       SCREEN 3 — CHANGELOG HISTORY
+  ══════════════════════════════════════════════ -->
+  <div id="screen-changelog" class="screen">
+    <div class="page-shell">
+
+      <div class="screen-header">
+        <button class="btn-back" onclick="goCompare()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Back
+        </button>
+        <div class="screen-title">Changelog History</div>
+        <div class="scanned-url-pill" id="cl-url">—</div>
+      </div>
+
+      <div class="cl-intro">Complete version history stored in the local database.</div>
+
+      <div class="cl-list" id="changelog-list">
+        <div class="cl-empty">Loading...</div>
+      </div>
+
+      <div class="action-bar">
+        <button class="btn btn-primary" onclick="startBuild()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          Proceed to Build APK
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       SCREEN 4 — DONE
+  ══════════════════════════════════════════════ -->
+  <div id="screen-done" class="screen">
+    <div class="page-shell home-shell">
+
+      <div class="done-icon-wrap">
+        <div class="done-circle">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+            <path d="M8 18l8 8 12-14" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+
+      <h2 class="done-title" id="done-title">APK Ready</h2>
+      <p class="done-sub" id="done-subtitle">Your Android app has been built from the scanned website.</p>
+
+      <div class="done-meta-card" id="done-meta"></div>
+
+      <div class="done-actions">
+        <a id="btn-download-apk" href="/api/download" class="btn btn-primary btn-lg" download>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download APK
+        </a>
+        <a id="btn-download-ios" href="/api/download-ios" class="btn btn-outline btn-lg" download>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          Download iOS Project
+        </a>
+        <button class="btn btn-outline" onclick="goHome()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          Scan Another URL
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

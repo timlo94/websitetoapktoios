@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="file" path="www/" />
+        <exclude domain="file" path="www_old/" />
+        <exclude domain="file" path="www_staging/" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="file" path="temp/" />
+    </device-transfer>
+</data-extraction-rules>

@@ -1,0 +1,24 @@
+{
+  "id": "snap_1785033638487",
+  "url": "https://example.com",
+  "timestamp": 1785033638487,
+  "fileCount": 2,
+  "files": [
+    {
+      "id": "index.html",
+      "url": "https://example.com",
+      "type": "html",
+      "hash": "ff67a9d764d6a2367a187734e697f6a53217db9a21c101d410a113ca871a299d",
+      "size": 559
+    },
+    {
+      "id": "inline_style_0",
+      "url": null,
+      "type": "inline-css",
+      "hash": "6cfcf5a7e84f46f501ebf7285cee6c9a5274d2ed24c07386cfe34655c09229e3",
+      "size": 145
+    }
+  ],
+  "rawHtml": "<!doctype html><html lang=\"en\"><head><title>Example Domain</title><link rel=\"icon\" href=\"data:,\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><style>body{background:#eee;width:60vw;margin:15vh auto;font-family:system-ui,sans-serif}h1{font-size:1.5em}div{opacity:0.8}a:link,a:visited{color:#348}</style></head><body><div><h1>Example Domain</h1><p>This domain is for use in documentation examples without needing permission. Avoid use in operations.</p><p><a href=\"https://iana.org/domains/example\">Learn more</a></p></div></body></html>\n",
+  "assets": []
+}

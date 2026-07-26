@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CDDUA R&D Admin & Simulation Console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <link rel="stylesheet" href="css/console.css">
+</head>
+<body>
+  <div class="console-layout">
+    <!-- Header -->
+    <header class="console-header">
+      <div class="brand">
+        <div class="brand-icon"><i data-lucide="shield"></i></div>
+        <div>
+          <h1>CDDUA <span class="accent-text">COMMAND CENTER</span></h1>
+          <p>PhD R&D Algorithmic Diffing & Ed25519 Cryptographic Telemetry</p>
+        </div>
+      </div>
+      <div class="header-stats">
+        <div class="stat-badge">
+          <span>Merkle Version:</span>
+          <strong id="stat-ver" class="text-cyan">Loading...</strong>
+        </div>
+        <div class="stat-badge">
+          <span>Active Clients:</span>
+          <strong id="stat-clients" class="text-green">0</strong>
+        </div>
+        <a href="/webapp" target="_blank" class="btn btn-outline">
+          <i data-lucide="external-link"></i> Launch Web Simulator
+        </a>
+      </div>
+    </header>
+
+    <!-- Main Workspace Grid -->
+    <main class="console-grid">
+      <!-- Left Column: Live Merkle Tree & File Inspector -->
+      <section class="panel">
+        <div class="panel-header">
+          <h2><i data-lucide="folder-tree"></i> Merkle Tree Manifest & SHA-256 Hashes</h2>
+          <button class="btn-xs btn-secondary" onclick="refreshManifest()">
+            <i data-lucide="refresh-cw"></i> Refresh
+          </button>
+        </div>
+        <div class="panel-body">
+          <p class="panel-desc">Click any file below to live-edit its content and trigger a real-time delta diff!</p>
+          <div id="merkle-tree-list" class="merkle-list">
+            <div class="loading-spinner">Loading manifest...</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Center Column: Live File Editor & Delta Trigger -->
+      <section class="panel">
+        <div class="panel-header">
+          <h2><i data-lucide="edit-3"></i> Real-Time Delta Patch Trigger</h2>
+          <span id="editing-file-badge" class="file-badge">No file selected</span>
+        </div>
+        <div class="panel-body editor-body">
+          <div class="preset-buttons">
+            <button class="btn-preset" onclick="applyPreset('css-color')">
+              🎨 Tweak Cyber Color
+            </button>
+            <button class="btn-preset" onclick="applyPreset('hero-text')">
+              📝 Update Hero Title
+            </button>
+            <button class="btn-preset" onclick="applyPreset('add-announcement')">
+              ⚡ Add Live Announcement
+            </button>
+          </div>
+          <textarea id="file-editor" class="code-editor" placeholder="Select a file from the left Merkle tree to inspect or edit..."></textarea>
+          <div class="editor-actions">
+            <button id="save-btn" class="btn btn-primary btn-full" onclick="saveFileChanges()" disabled>
+              <i data-lucide="zap"></i> Save & Broadcast Delta Patch to Clients
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Live Broadcast Logs & Connected Clients -->
+      <section class="panel">
+        <div class="panel-header">
+          <h2><i data-lucide="activity"></i> Real-Time Telemetry & Broadcast Log</h2>
+          <button class="btn-xs btn-secondary" onclick="clearLogs()">Clear</button>
+        </div>
+        <div class="panel-body">
+          <div class="client-section">
+            <h3>Connected Containers (<span id="client-count-num">0</span>)</h3>
+            <div id="clients-list" class="clients-container">
+              <div class="empty-state">No clients connected yet. Open /webapp in a tab or launch Android APK!</div>
+            </div>
+          </div>
+          <div class="logs-section">
+            <h3>Algorithmic & Socket Event Log</h3>
+            <div id="event-logs" class="event-logs">
+              <div class="log-item system">
+                <span class="log-time">[System]</span> Console initialized. Listening for WebSocket telemetry...
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="js/console.js"></script>
+  <script>lucide.createIcons();</script>
+</body>
+</html>

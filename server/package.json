@@ -1,0 +1,31 @@
+{
+  "name": "cddua-server",
+  "version": "1.0.0",
+  "description": "Community-Distributed Dynamic Update Architecture (CDDUA) Backend Server",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node src/index.js"
+  },
+  "keywords": [
+    "cddua",
+    "dynamic-update",
+    "merkle",
+    "ed25519",
+    "hot-reload"
+  ],
+  "author": "CDDUA PhD R&D Team",
+  "license": "MIT",
+  "dependencies": {
+    "adm-zip": "^0.5.12",
+    "axios": "^1.7.2",
+    "cheerio": "^1.0.0",
+    "chokidar": "^3.6.0",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "jimp": "^1.6.1",
+    "morgan": "^1.10.0",
+    "socket.io": "^4.7.5",
+    "sql.js": "^1.14.1"
+  }
+}

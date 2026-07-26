@@ -1,0 +1,88 @@
+/* CDDUA Admin Console Styles */
+:root {
+  --bg-dark: #0A0D14;
+  --bg-panel: #121722;
+  --bg-sub: #1A2130;
+  --border: rgba(255, 255, 255, 0.08);
+  --text-main: #F8FAFC;
+  --text-sub: #94A3B8;
+  --cyan: #00F2FE;
+  --purple: #6366F1;
+  --green: #10B981;
+  --pink: #EC4899;
+  --font-sans: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-head: 'Outfit', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg-dark); color: var(--text-main); font-family: var(--font-sans); height: 100vh; overflow: hidden; }
+
+.console-layout { display: flex; flex-direction: column; height: 100vh; padding: 16px; gap: 16px; }
+
+/* Header */
+.console-header {
+  background: var(--bg-panel); border: 1px solid var(--border); border-radius: 12px; padding: 14px 20px;
+  display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
+}
+.brand { display: flex; align-items: center; gap: 14px; }
+.brand-icon { width: 40px; height: 40px; background: linear-gradient(135deg, var(--cyan), var(--purple)); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px; }
+.brand h1 { font-family: var(--font-head); font-size: 1.3rem; font-weight: 800; }
+.accent-text { color: var(--cyan); }
+.brand p { font-size: 0.75rem; color: var(--text-sub); }
+
+.header-stats { display: flex; align-items: center; gap: 16px; }
+.stat-badge { background: var(--bg-sub); border: 1px solid var(--border); padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; }
+.text-cyan { color: var(--cyan); }
+.text-green { color: var(--green); }
+
+/* Buttons */
+.btn { font-family: var(--font-head); font-size: 0.85rem; font-weight: 600; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; transition: all 0.2s; }
+.btn-outline { background: transparent; border: 1px solid var(--cyan); color: var(--cyan); }
+.btn-outline:hover { background: rgba(0, 242, 254, 0.1); }
+.btn-primary { background: linear-gradient(135deg, var(--purple), #8B5CF6); color: #fff; }
+.btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-secondary { background: var(--bg-sub); color: var(--text-main); border: 1px solid var(--border); }
+.btn-xs { padding: 4px 10px; font-size: 0.75rem; border-radius: 6px; border: none; cursor: pointer; background: var(--bg-sub); color: var(--text-sub); }
+.btn-full { width: 100%; justify-content: center; padding: 12px; }
+
+/* Grid Workspace */
+.console-grid { display: grid; grid-template-columns: 360px 1fr 400px; gap: 16px; flex-grow: 1; min-height: 0; }
+
+.panel { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; }
+.panel-header { padding: 12px 16px; background: var(--bg-sub); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.panel-header h2 { font-family: var(--font-head); font-size: 0.95rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.panel-body { padding: 16px; flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+.panel-desc { font-size: 0.8rem; color: var(--text-sub); }
+
+/* Merkle Tree List */
+.merkle-list { display: flex; flex-direction: column; gap: 8px; }
+.file-item { background: var(--bg-sub); border: 1px solid var(--border); padding: 10px; border-radius: 8px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; gap: 4px; }
+.file-item:hover, .file-item.active { border-color: var(--cyan); background: rgba(0, 242, 254, 0.05); }
+.file-path { font-family: var(--font-mono); font-size: 0.85rem; font-weight: 700; color: #fff; display: flex; justify-content: space-between; }
+.file-meta { font-size: 0.75rem; color: var(--text-sub); display: flex; justify-content: space-between; }
+.hash-tag { font-family: var(--font-mono); color: var(--cyan); }
+
+/* Editor */
+.editor-body { padding: 12px; gap: 12px; }
+.preset-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn-preset { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border); color: var(--text-sub); font-size: 0.75rem; padding: 6px 10px; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
+.btn-preset:hover { background: rgba(0, 242, 254, 0.1); color: var(--cyan); border-color: var(--cyan); }
+.file-badge { font-family: var(--font-mono); font-size: 0.75rem; background: var(--bg-dark); padding: 4px 8px; border-radius: 4px; color: var(--text-sub); }
+.code-editor { flex-grow: 1; background: var(--bg-dark); border: 1px solid var(--border); border-radius: 8px; padding: 12px; color: #61AFEF; font-family: var(--font-mono); font-size: 0.85rem; line-height: 1.5; resize: none; outline: none; }
+.code-editor:focus { border-color: var(--purple); }
+
+/* Telemetry Logs & Clients */
+.client-section, .logs-section { display: flex; flex-direction: column; gap: 8px; }
+.client-section { border-bottom: 1px solid var(--border); padding-bottom: 12px; }
+h3 { font-size: 0.85rem; color: var(--text-sub); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.clients-container { display: flex; flex-direction: column; gap: 6px; max-height: 120px; overflow-y: auto; }
+.client-box { background: var(--bg-sub); padding: 8px 10px; border-radius: 6px; font-size: 0.8rem; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid var(--green); }
+.event-logs { flex-grow: 1; background: var(--bg-dark); border: 1px solid var(--border); border-radius: 8px; padding: 10px; font-family: var(--font-mono); font-size: 0.75rem; overflow-y: auto; max-height: 300px; display: flex; flex-direction: column; gap: 6px; }
+.log-item { line-height: 1.4; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 4px; }
+.log-time { color: var(--text-sub); }
+.log-item.patch { color: var(--cyan); font-weight: 600; }
+.log-item.file { color: #E5C07B; }
+.log-item.client { color: var(--green); }
+.empty-state { font-size: 0.8rem; color: var(--text-sub); font-style: italic; }

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- Exclude CDDUA sandboxed web files from cloud backups to prevent corruption -->
+    <exclude domain="file" path="www/" />
+    <exclude domain="file" path="www_old/" />
+    <exclude domain="file" path="www_staging/" />
+    <exclude domain="file" path="temp/" />
+</full-backup-content>
