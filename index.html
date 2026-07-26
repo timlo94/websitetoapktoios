@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web → APK & iOS Builder | 100% Free & Open Source</title>
+  <meta name="description" content="Turn any website or Web Application into native Android APKs and iOS Xcode Projects instantly with real-time Gradle streaming and OTA hot-reload patching.">
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --bg-dark: #07090e;
+      --bg-card: rgba(17, 24, 39, 0.7);
+      --bg-card-hover: rgba(26, 35, 51, 0.85);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(6, 182, 212, 0.4);
+      --primary: #06b6d4;
+      --primary-glow: rgba(6, 182, 212, 0.35);
+      --secondary: #8b5cf6;
+      --secondary-glow: rgba(139, 92, 246, 0.35);
+      --accent: #10b981;
+      --accent-glow: rgba(16, 185, 129, 0.35);
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --text-dim: #6b7280;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      line-height: 1.6;
+      background-image: 
+        radial-gradient(circle at 15% 20%, rgba(6, 182, 212, 0.12) 0%, transparent 45%),
+        radial-gradient(circle at 85% 75%, rgba(139, 92, 246, 0.12) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 60%);
+      background-attachment: fixed;
+    }
+
+    h1, h2, h3, h4, .font-heading {
+      font-family: 'Outfit', sans-serif;
+    }
+
+    code, pre, .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Glassmorphism Utility */
+    .glass {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .glass:hover {
+      border-color: var(--border-hover);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Navbar */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 5%;
+      max-width: 1400px;
+      margin: 0 auto;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(7, 9, 14, 0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: -0.5px;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px var(--primary-glow);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      align-items: center;
+    }
+
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: color 0.2s;
+    }
+
+    .nav-link:hover {
+      color: #fff;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.25s ease;
+      border: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), #0284c7);
+      color: #fff;
+      box-shadow: 0 4px 20px var(--primary-glow);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px var(--primary-glow);
+      background: linear-gradient(135deg, #22d3ee, #0369a1);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Hero Section */
+    .hero {
+      max-width: 1300px;
+      margin: 80px auto 60px;
+      padding: 0 5%;
+      text-align: center;
+      position: relative;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: 50px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: var(--accent);
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 24px;
+      animation: pulse-border 2s infinite;
+    }
+
+    @keyframes pulse-border {
+      0%, 100% { border-color: rgba(16, 185, 129, 0.3); }
+      50% { border-color: rgba(16, 185, 129, 0.8); box-shadow: 0 0 15px var(--accent-glow); }
+    }
+
+    .hero-title {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -1.5px;
+      margin-bottom: 24px;
+      background: linear-gradient(135deg, #fff 0%, #cbd5e1 50%, var(--primary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(1.1rem, 2vw, 1.35rem);
+      color: var(--text-muted);
+      max-width: 760px;
+      margin: 0 auto 48px;
+    }
+
+    /* Interactive Simulator Box */
+    .simulator-container {
+      max-width: 1000px;
+      margin: 0 auto 80px;
+      padding: 32px;
+      position: relative;
+      background: linear-gradient(180deg, rgba(17, 24, 39, 0.8) 0%, rgba(10, 15, 26, 0.9) 100%);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 0 1px var(--border);
+    }
+
+    .sim-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sim-dots {
+      display: flex;
+      gap: 8px;
+    }
+
+    .sim-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .sim-dot.red { background: #ef4444; }
+    .sim-dot.yellow { background: #f59e0b; }
+    .sim-dot.green { background: #10b981; }
+
+    .sim-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .url-input-group {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .url-input {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      color: #fff;
+      font-size: 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .url-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.2);
+    }
+
+    /* Simulator Progress Display */
+    .sim-stage {
+      display: none;
+      text-align: left;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      animation: fadeIn 0.4s ease forwards;
+    }
+
+    .sim-stage.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .stage-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #fff;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 16px;
+      position: relative;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      border-radius: 10px;
+      transition: width 0.3s ease;
+      position: relative;
+    }
+
+    .progress-bar-fill::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+      animation: shimmer 1.5s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .term-log {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: #34d399;
+      background: #05070c;
+      padding: 16px;
+      border-radius: 10px;
+      height: 140px;
+      overflow-y: auto;
+      border: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .term-line {
+      display: flex;
+      gap: 8px;
+    }
+
+    .term-line::before {
+      content: '>';
+      color: var(--text-dim);
+    }
+
+    /* Result Preview Showcase */
+    .result-showcase {
+      display: none;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 24px;
+    }
+
+    .result-showcase.active {
+      display: grid;
+    }
+
+    @media (max-width: 768px) {
+      .result-showcase.active { grid-template-columns: 1fr; }
+      .url-input-group { flex-direction: column; }
+    }
+
+    .download-card {
+      padding: 24px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.25s;
+    }
+
+    .download-card:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .dl-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .dl-desc {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+    }
+
+    /* Bento Grid Features */
+    .section-title {
+      text-align: center;
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+      margin-bottom: 16px;
+    }
+
+    .section-subtitle {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      max-width: 600px;
+      margin: 0 auto 60px;
+    }
+
+    .bento-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+      max-width: 1300px;
+      margin: 0 auto 100px;
+      padding: 0 5%;
+    }
+
+    .bento-item {
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .bento-icon {
+      width: 54px;
+      height: 54px;
+      border-radius: 16px;
+      background: rgba(6, 182, 212, 0.1);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+      font-size: 1.5rem;
+      border: 1px solid rgba(6, 182, 212, 0.2);
+    }
+
+    .bento-item:nth-child(2) .bento-icon {
+      background: rgba(139, 92, 246, 0.1);
+      color: var(--secondary);
+      border-color: rgba(139, 92, 246, 0.2);
+    }
+
+    .bento-item:nth-child(3) .bento-icon {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--accent);
+      border-color: rgba(16, 185, 129, 0.2);
+    }
+
+    .bento-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 12px;
+    }
+
+    .bento-desc {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    /* Terminal Quick Start */
+    .terminal-section {
+      max-width: 900px;
+      margin: 0 auto 120px;
+      padding: 0 5%;
+    }
+
+    .terminal-box {
+      background: #05070c;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+    }
+
+    .terminal-header {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .term-copy-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .term-copy-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+    }
+
+    .terminal-body {
+      padding: 24px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.95rem;
+      line-height: 2;
+      color: #e2e8f0;
+      overflow-x: auto;
+    }
+
+    .cmd-comment { color: #64748b; }
+    .cmd-prompt { color: var(--primary); font-weight: 700; user-select: none; margin-right: 8px; }
+    .cmd-text { color: #38bdf8; font-weight: 600; }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 60px 5%;
+      text-align: center;
+      background: rgba(5, 7, 12, 0.8);
+      color: var(--text-muted);
+    }
+
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    @media (max-width: 600px) {
+      .footer-content { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <a href="#" class="logo">
+      <div class="logo-icon"><i data-lucide="smartphone" color="#fff"></i></div>
+      <span>WebtoAPK<span style="color:var(--primary)">toiOS</span></span>
+    </a>
+    <div class="nav-links">
+      <a href="#features" class="nav-link">Features</a>
+      <a href="#quickstart" class="nav-link">Quick Start</a>
+      <a href="https://github.com/timlo94/websitetoapktoios" target="_blank" class="btn btn-secondary" style="padding: 8px 16px;">
+        <i data-lucide="github" width="18"></i>
+        <span>GitHub Repo</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="badge">
+      <i data-lucide="sparkles" width="16"></i>
+      <span>100% Free & Open-Source Transformation Engine</span>
+    </div>
+    <h1 class="hero-title">Turn Any Website Into Native<br>Android APKs & iOS Apps.</h1>
+    <p class="hero-subtitle">
+      Convert URLs into production-ready Android APKs and macOS Xcode iOS projects in seconds. Features real-time step-by-step Gradle streaming, automatic high-res icon generation, and live CDDUA OTA hot-reload patching.
+    </p>
+
+    <!-- Interactive Simulator -->
+    <div class="simulator-container glass">
+      <div class="sim-header">
+        <div class="sim-dots">
+          <div class="sim-dot red"></div>
+          <div class="sim-dot yellow"></div>
+          <div class="sim-dot green"></div>
+        </div>
+        <div class="sim-title">
+          <i data-lucide="terminal" width="16" color="var(--primary)"></i>
+          <span>Live Interactive Conversion Simulator (Demo Mode)</span>
+        </div>
+        <div style="font-size:0.8rem; color:var(--text-dim)">v2.0.0-PROD</div>
+      </div>
+
+      <div class="url-input-group">
+        <input type="url" id="urlInput" class="url-input" value="https://countries.malaysiapage.com/" placeholder="Enter website URL (e.g., https://yourwebsite.com/)">
+        <button onclick="runSimulation()" id="simBtn" class="btn btn-primary" style="padding: 16px 32px; font-size:1.05rem;">
+          <i data-lucide="zap" width="20"></i>
+          <span>Simulate Build</span>
+        </button>
+      </div>
+
+      <!-- Stage 1: Progress & Terminal -->
+      <div id="simProgress" class="sim-stage">
+        <div class="stage-title">
+          <i data-lucide="cpu" class="animate-spin" width="20" color="var(--primary)"></i>
+          <span id="stageText">Initializing conversion pipeline...</span>
+          <span id="stagePercent" style="margin-left:auto; font-family:'JetBrains Mono'; color:var(--accent);">0%</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div id="progressBar" class="progress-bar-fill"></div>
+        </div>
+        <div id="termLog" class="term-log">
+          <div class="term-line">Ready to simulate conversion pipeline for target host...</div>
+        </div>
+      </div>
+
+      <!-- Stage 2: Results -->
+      <div id="simResults" class="result-showcase">
+        <div class="download-card">
+          <div>
+            <div class="dl-title">
+              <i data-lucide="bot" color="#22c55e" width="28"></i>
+              <span>Android App Package (APK)</span>
+            </div>
+            <p class="dl-desc">
+              Native Android wrapper container with hardware acceleration, back-button handling, DOM storage, and embedded mipmap icons generated from your website's favicon.
+            </p>
+            <div style="font-family:'JetBrains Mono'; font-size:0.8rem; color:var(--text-dim); margin-bottom: 16px;">
+              📦 Target: <span id="apkNameDisplay" style="color:#fff">app-release.apk</span> (14.2 MB)<br>
+              ⚡ Engine: Native Android WebView + CDDUA Client
+            </div>
+          </div>
+          <button onclick="alert('This is an interactive demo on GitHub Pages! To build real APKs, clone the repository and run `npm start` on your computer!')" class="btn btn-primary" style="width:100%; justify-content:center; background:linear-gradient(135deg, #10b981, #059669);">
+            <i data-lucide="download" width="18"></i>
+            <span>Download Simulated APK</span>
+          </button>
+        </div>
+
+        <div class="download-card">
+          <div>
+            <div class="dl-title">
+              <i data-lucide="apple" color="#38bdf8" width="28"></i>
+              <span>iOS Xcode Project (Swift)</span>
+            </div>
+            <p class="dl-desc">
+              Complete Swift WKWebView Xcode project archive ready to open, build, and deploy to iPhone or iPad on macOS Xcode with pre-configured Info.plist permissions.
+            </p>
+            <div style="font-family:'JetBrains Mono'; font-size:0.8rem; color:var(--text-dim); margin-bottom: 16px;">
+              📦 Target: <span id="iosNameDisplay" style="color:#fff">ios-project.zip</span> (4.8 MB)<br>
+              ⚡ Engine: Swift 5 + iOS WKWebView Container
+            </div>
+          </div>
+          <button onclick="alert('This is an interactive demo on GitHub Pages! To build real Xcode projects, clone the repository and run `npm start` on your computer!')" class="btn btn-secondary" style="width:100%; justify-content:center; border-color:var(--primary); color:var(--primary);">
+            <i data-lucide="folder-down" width="18"></i>
+            <span>Download Simulated Xcode ZIP</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Features Grid -->
+  <section id="features" style="padding-top: 40px;">
+    <h2 class="section-title">Why Developers Choose WebtoAPKtoiOS</h2>
+    <p class="section-subtitle">Architected from the ground up to eliminate web-to-mobile friction with enterprise-grade tooling, open for everyone.</p>
+
+    <div class="bento-grid">
+      <div class="bento-item glass">
+        <div class="bento-icon"><i data-lucide="activity"></i></div>
+        <h3 class="bento-title">Real-Time Gradle Streaming</h3>
+        <p class="bento-desc">
+          No more guessing or blind loading spinners. Watch live step-by-step progress as the server parses real Gradle stdout—from resource merging and Kotlin compilation to DEX bytecode optimization and APK packaging.
+        </p>
+      </div>
+
+      <div class="bento-item glass">
+        <div class="bento-icon"><i data-lucide="refresh-cw"></i></div>
+        <h3 class="bento-title">CDDUA Hot-Reload Engine</h3>
+        <p class="bento-desc">
+          Differential Over-The-Air (OTA) patching via WebSockets. Push instant CSS, HTML, or JS updates directly to your users' Android internal sandbox without ever requiring them to download or re-install a full APK.
+        </p>
+      </div>
+
+      <div class="bento-item glass">
+        <div class="bento-icon"><i data-lucide="image"></i></div>
+        <h3 class="bento-title">Automated Mipmap Icon Generator</h3>
+        <p class="bento-desc">
+          Stop manually resizing icons in image editors. Our scraper automatically extracts your website's favicon and generates crisp launcher icons across all 5 Android density levels (`mdpi`, `hdpi`, `xhdpi`, `xxhdpi`, `xxxhdpi`).
+        </p>
+      </div>
+
+      <div class="bento-item glass">
+        <div class="bento-icon"><i data-lucide="shield-check"></i></div>
+        <h3 class="bento-title">Native Android Container</h3>
+        <p class="bento-desc">
+          Built-in high-performance WebView wrapper pre-configured for JavaScript execution, DOM storage, HTML5 media playback, hardware acceleration, and seamless native hardware back-button navigation.
+        </p>
+      </div>
+
+      <div class="bento-item glass">
+        <div class="bento-icon"><i data-lucide="laptop"></i></div>
+        <h3 class="bento-title">1-Click iOS Xcode Exporter</h3>
+        <p class="bento-desc">
+          Seamlessly export a clean, structured Swift `WKWebView` project archive (`ViewController.swift`, `SceneDelegate.swift`, `Info.plist`) ready to open and compile in macOS Xcode.
+        </p>
+      </div>
+
+      <div class="bento-item glass">
+        <div class="bento-icon"><i data-lucide="terminal-square"></i></div>
+        <h3 class="bento-title">100% Open Source & Free</h3>
+        <p class="bento-desc">
+          No SaaS paywalls, no monthly subscription fees, and no artificial build limits. Run the lightweight Node.js server on your own computer, local server, or cloud provider via Docker.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick Start Section -->
+  <section id="quickstart" class="terminal-section">
+    <h2 class="section-title">Start Building in 60 Seconds</h2>
+    <p class="section-subtitle">Clone the repository and run the engine locally on Windows, macOS, or Linux.</p>
+
+    <div class="terminal-box">
+      <div class="terminal-header">
+        <div class="sim-dots">
+          <div class="sim-dot red"></div>
+          <div class="sim-dot yellow"></div>
+          <div class="sim-dot green"></div>
+        </div>
+        <div style="font-family:'JetBrains Mono'; font-size:0.85rem; color:var(--text-muted);">bash — local terminal</div>
+        <button onclick="copyCmd()" id="copyBtn" class="term-copy-btn">
+          <i data-lucide="copy" width="14"></i>
+          <span>Copy Commands</span>
+        </button>
+      </div>
+      <div class="terminal-body" id="cmdContent">
+<span class="cmd-comment"># 1. Clone the open-source repository</span><br>
+<span class="cmd-prompt">$</span><span class="cmd-text">git clone https://github.com/timlo94/websitetoapktoios.git</span><br>
+<span class="cmd-prompt">$</span><span class="cmd-text">cd websitetoapktoios/server</span><br><br>
+<span class="cmd-comment"># 2. Install Node.js backend dependencies</span><br>
+<span class="cmd-prompt">$</span><span class="cmd-text">npm install</span><br><br>
+<span class="cmd-comment"># 3. Start the Web-to-APK Builder server & UI</span><br>
+<span class="cmd-prompt">$</span><span class="cmd-text">npm start</span><br><br>
+<span class="cmd-comment"># 🎉 Server running at http://localhost:3000/ — Open in browser!</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <div class="logo" style="font-size:1.1rem;">
+        <div class="logo-icon" style="width:30px; height:30px;"><i data-lucide="smartphone" width="16" color="#fff"></i></div>
+        <span>WebtoAPKtoiOS</span>
+      </div>
+      <div>
+        Released under the <strong>MIT License</strong> • Free for developers worldwide.
+      </div>
+      <div>
+        Created by <a href="https://github.com/timlo94" target="_blank" style="color:var(--primary); text-decoration:none; font-weight:600;">timlo94</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // Copy terminal command
+    function copyCmd() {
+      const text = `git clone https://github.com/timlo94/websitetoapktoios.git\ncd websitetoapktoios/server\nnpm install\nnpm start`;
+      navigator.clipboard.writeText(text);
+      const btn = document.getElementById('copyBtn');
+      btn.innerHTML = `<i data-lucide="check" width="14" color="#10b981"></i><span style="color:#10b981">Copied!</span>`;
+      lucide.createIcons();
+      setTimeout(() => {
+        btn.innerHTML = `<i data-lucide="copy" width="14"></i><span>Copy Commands</span>`;
+        lucide.createIcons();
+      }, 2500);
+    }
+
+    // Interactive Build Simulator
+    async function runSimulation() {
+      const urlInput = document.getElementById('urlInput');
+      const simBtn = document.getElementById('simBtn');
+      const simProgress = document.getElementById('simProgress');
+      const simResults = document.getElementById('simResults');
+      const progressBar = document.getElementById('progressBar');
+      const stageText = document.getElementById('stageText');
+      const stagePercent = document.getElementById('stagePercent');
+      const termLog = document.getElementById('termLog');
+
+      let url = urlInput.value.trim() || 'https://countries.malaysiapage.com/';
+      if (!url.startsWith('http')) url = 'https://' + url;
+      urlInput.value = url;
+
+      // Extract hostname for display
+      let host = 'webapp';
+      try { host = new URL(url).hostname.replace(/[^a-zA-Z0-9]/g, ''); } catch(e){}
+      document.getElementById('apkNameDisplay').textContent = `${host}.apk`;
+      document.getElementById('iosNameDisplay').textContent = `${host}-ios-xcode.zip`;
+
+      // Reset & UI state
+      simBtn.disabled = true;
+      simBtn.style.opacity = '0.5';
+      simResults.classList.remove('active');
+      simProgress.classList.add('active');
+      progressBar.style.width = '0%';
+      termLog.innerHTML = `<div class="term-line">Starting conversion for ${url}...</div>`;
+
+      const steps = [
+        { p: 12, msg: "🌐 Scraping website assets & HTML DOM structure...", log: "GET / (200 OK) - Scraped 14 embedded scripts and stylesheets." },
+        { p: 28, msg: "🎨 Fetching website favicon & generating Android mipmaps...", log: "Converted apple-touch-icon.png -> mipmap-mdpi, hdpi, xhdpi, xxhdpi, xxxhdpi." },
+        { p: 45, msg: "🔧 Configuring native Android WebView wrapper & permissions...", log: "Injecting JavaScript bridge & CDDUA WebSocket client into AndroidManifest.xml." },
+        { p: 62, msg: "🔨 Compiling Kotlin source code (gradlew assembleDebug)...", log: "> Task :app:compileDebugKotlin [SUCCESS]\n> Task :app:mergeDebugResources [SUCCESS]" },
+        { p: 80, msg: "⚡ Optimizing DEX bytecode & signing Android APK package...", log: "> Task :app:packageDebug [SUCCESS] - Created app-debug.apk (14.2 MB)." },
+        { p: 94, msg: "🍏 Structuring macOS Xcode iOS Swift project archive...", log: "Generated ViewController.swift with WKWebView & packaged into Xcode ZIP archive." },
+        { p: 100, msg: "🎉 Conversion build successful! Mobile packages ready.", log: "SUCCESS: Mobile apps built and verified in 4.2 seconds!" }
+      ];
+
+      for (let i = 0; i < steps.length; i++) {
+        await new Promise(r => setTimeout(r, 600));
+        const step = steps[i];
+        progressBar.style.width = step.p + '%';
+        stageText.textContent = step.msg;
+        stagePercent.textContent = step.p + '%';
+        
+        const line = document.createElement('div');
+        line.className = 'term-line';
+        line.textContent = step.log;
+        termLog.appendChild(line);
+        termLog.scrollTop = termLog.scrollHeight;
+      }
+
+      await new Promise(r => setTimeout(r, 500));
+      simProgress.style.display = 'none';
+      simResults.classList.add('active');
+      simBtn.disabled = false;
+      simBtn.style.opacity = '1';
+    }
+  </script>
+</body>
+</html>
